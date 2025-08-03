@@ -35,11 +35,22 @@ That means:
 This is why the Internet uses a hierarchical naming system instead.
 
 ## Hierarchical Name Space
-In a hierarchical name space, each name is made of several parts. The parts are organized in an inverted-tree structure with the root at the top. The tree can have only 128 levels: level 0 (root) to level 127.
+In a hierarchical name space, each name is made of several parts. The parts are organized in an inverted-tree structure with the root at the top. 
+
+The DNS hierarchy can have a maximum of 128 levels:
+- Level 0 → Root
+- Level 127 → Deepest possible node
 
 <img width="603" height="228" alt="image" src="https://github.com/user-attachments/assets/15ffd2b7-87fc-4050-82f3-2577ac8b0f20" />
 
-Each node in the tree has a `label`, which is a string with a maximum of 63 characters. The root label is a null string (empty string). DNS requires that children of a node (nodes that branch from the same node) have different labels, which guarantees the uniqueness of the domain names.
+
+#### Labels
+Each node in the tree has a label, which is a string containing up to 63 characters.
+
+- The root label is an empty string (null label).
+- All child nodes of the same parent must have **unique labels**. This uniqueness requirement ensures that every domain name within the DNS hierarchy is unique.
+
+
 
 Each node in the tree has a `domain name`. A full domain name is a sequence of labels separated by dots (.). The domain names are always read from the node up to the root. The last label is the label of the root(null). This means that a full domain name always ends in a null label, which means the last character is a dot because the null string is nothing.
 
