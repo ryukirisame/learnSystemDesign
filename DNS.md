@@ -47,7 +47,36 @@ A `domain` is a subtree of the domain name space. The name of the domain is the 
 <img width="588" height="269" alt="image" src="https://github.com/user-attachments/assets/b83cf62e-ec0c-4f6d-b5c5-10c0e80db33c" />
 
 **Fully Qualified Domain Name**: If a domain name is terminated by a null string, it is called a fully qualified domain name (FQDN). The name must end with a null label, but because null means nothing, the label ends with a dot.
+
 **Partially Qualified Domain Name**: If a label is not terminated by a null string, it is called a partially qualified domain name (PQDN). A PQDN starts from a node, but it does not reach the root. It is used when the name to be resolved belongs to the same site as the client. Here the resolver can supply the missing part, called the suffix, to create an FQDN. 
+
+### Parts of a Hierarchical Domain Name
+
+In the hierarchical name space, a **fully qualified domain name (FQDN)** is made up of different levels, read from right to left:
+
+1. **Top‑Level Domain (TLD)** – The highest level in the hierarchy, located just below the root (`.`). Examples include:
+    * **Generic TLDs (gTLDs)**: `.com`, `.org`, `.net`
+    * **Country‑code TLDs (ccTLDs)**: `.in` (India), `.uk` (United Kingdom), `.jp` (Japan)
+2. **Second‑Level Domain (SLD)** – The part immediately to the left of the TLD. It is typically chosen by the domain owner and represents the main identity of the domain.
+    * Example: In `example.com`, `example` is the SLD.
+3. **Subdomain** – Any label that appears to the left of the SLD. Subdomains are used to organize different sections or services of a website.
+    * Example: In `mail.example.com`, `mail` is a subdomain of `example.com`.
+4. **Host Name** – The specific name of a device or service within a domain. In many cases, the subdomain also serves as the host name.
+    * Example: `www` in `www.example.com` is often used as the host name for the web server.
+
+ **Example Breakdown**
+
+ ```
+ www.mail.example.com.
+ └── Root (.)
+    └── Top‑Level Domain: com
+         └── Second‑Level Domain: example
+             └── Subdomain: mail
+                 └── Host Name: www
+ ```
+Every level in this structure is separated by a dot (`.`), and the entire sequence — including the final dot for the root — forms the **fully qualified domain name (FQDN)**.
+
+
 
 
 
