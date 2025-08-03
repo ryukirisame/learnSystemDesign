@@ -85,7 +85,12 @@ In the hierarchical name space, a **fully qualified domain name (FQDN)** is made
 
 1. **Top‑Level Domain (TLD)** – The highest level in the hierarchy, located just below the root (`.`). Examples include:
     * **Generic TLDs (gTLDs)**: `.com`, `.org`, `.net`
-    * **Country‑code TLDs (ccTLDs)**: `.in` (India), `.uk` (United Kingdom), `.jp` (Japan)
+    * **Country‑code TLDs (ccTLDs)**: Uses two-character country abbreviations. Eg: `.in` (India), `.uk` (United Kingdom), `.jp` (Japan). Second labels can be organizational, or they can be more specific,
+      national designations. The United States, for example, uses state abbreviations as a subdivision of us (e.g., `ca.us.`). The address `uci.ca.us.` can be translated to University of California, Irvine             university in the state of California in the United States.
+
+       <img width="467" height="236" alt="image" src="https://github.com/user-attachments/assets/0a42e568-55f6-4d86-8b17-592e939950fa" />
+
+      
 2. **Second‑Level Domain (SLD)** – The part immediately to the left of the TLD. It is typically chosen by the domain owner and represents the main identity of the domain.
     * Example: In `example.com`, `example` is the SLD.
 3. **Subdomain** – Any label that appears to the left of the SLD. Subdomains are used to organize different sections or services of a website.
