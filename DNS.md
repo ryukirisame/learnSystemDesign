@@ -94,7 +94,7 @@ In the hierarchical name space, a **fully qualified domain name (FQDN)** is made
              * `us` → United States country code TLD
              * `.` → Root
      
-       <img width="467" height="236" alt="image" src="https://github.com/user-attachments/assets/0a42e568-55f6-4d86-8b17-592e939950fa" />
+    <img width="467" height="236" alt="image" src="https://github.com/user-attachments/assets/0a42e568-55f6-4d86-8b17-592e939950fa" />
 
       
 2. **Second‑Level Domain (SLD)** – The part immediately to the left of the TLD. It is typically chosen by the domain owner and represents the main identity of the domain.
