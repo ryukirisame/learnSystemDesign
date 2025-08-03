@@ -9,7 +9,7 @@
 9. Types of DNS queries: recursive, iterative and non-recursive
 10. DNS Security Issues
 11. DNS query using dig command, ipconfig /displaydns
-12. How DNS works with CDN and load balancing
+12. How DNS works/integrates with CDN, load balancing, fail over, geo-load balancing
 13. Difference between www and mail. is www default?
 14. Anycast IPs
 
