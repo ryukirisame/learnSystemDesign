@@ -66,13 +66,18 @@ Example:
 
 <img width="545" height="349" alt="image" src="https://github.com/user-attachments/assets/1ab54393-5486-434a-9bd2-60c1e580d2e1" />
 
-A `domain` is a subtree of the domain name space. The name of the domain is the name of the node at the top of the subtree. Note that a domain may itself be divided into domains. 
+#### Domains
+A domain is simply a subtree of the domain name space. 
+- The name of the domain is the name of the node at the top of that subtree.
+- A domain can itself be divided into subdomains, which are represented by lower‑level branches of the tree.
 
 <img width="588" height="269" alt="image" src="https://github.com/user-attachments/assets/b83cf62e-ec0c-4f6d-b5c5-10c0e80db33c" />
 
-**Fully Qualified Domain Name**: If a domain name is terminated by a null string, it is called a fully qualified domain name (FQDN). The name must end with a null label, but because null means nothing, the label ends with a dot.
+#### Fully Qualified Domain Name (FQDN) vs Partially Qualified Domain Name (PQDN)
 
-**Partially Qualified Domain Name**: If a label is not terminated by a null string, it is called a partially qualified domain name (PQDN). A PQDN starts from a node, but it does not reach the root. It is used when the name to be resolved belongs to the same site as the client. Here the resolver can supply the missing part, called the suffix, to create an FQDN. 
+**Fully Qualified Domain Name**: If a domain name is terminated by a null string, it is called a fully qualified domain name (FQDN). The name must end with a null label, but because null means nothing, the label ends with a dot. Example: `mail.example.com.`.
+
+**Partially Qualified Domain Name**: If a domain name is not terminated by a null string, it is called a partially qualified domain name (PQDN). A PQDN starts from a node, but it does not reach the root. It is used when the name to be resolved belongs to the same site as the client. Here the resolver can supply the missing part, called the suffix, to create an FQDN. Example: `mail.example` (resolver may append `.com`).
 
 ### Parts of a Hierarchical Domain Name
 
