@@ -50,9 +50,19 @@ Each node in the tree has a label, which is a string containing up to 63 charact
 - The root label is an empty string (null label).
 - All child nodes of the same parent must have **unique labels**. This uniqueness requirement ensures that every domain name within the DNS hierarchy is unique.
 
+#### Domain Names
+Each node in the DNS hierarchy has a domain name.
+A full domain name is formed by combining the labels from a given node up to the root, separated by dots (`.`).
+- The last label is always the root label (null string), which means a fully qualified domain name ends with a dot (`.`).
+- This trailing dot represents the root and is typically omitted in everyday use, but it exists conceptually.
 
+Example:
+`www.example.com.`
+- `www` → label of a host node
+- `example` → label of the second‑level domain node
+- `com` → label of the top‑level domain node
+- `.` → root label (null string)
 
-Each node in the tree has a `domain name`. A full domain name is a sequence of labels separated by dots (.). The domain names are always read from the node up to the root. The last label is the label of the root(null). This means that a full domain name always ends in a null label, which means the last character is a dot because the null string is nothing.
 
 <img width="545" height="349" alt="image" src="https://github.com/user-attachments/assets/1ab54393-5486-434a-9bd2-60c1e580d2e1" />
 
