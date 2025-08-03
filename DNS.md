@@ -85,9 +85,15 @@ In the hierarchical name space, a **fully qualified domain name (FQDN)** is made
 
 1. **Top‑Level Domain (TLD)** – The highest level in the hierarchy, located just below the root (`.`). Examples include:
     * **Generic TLDs (gTLDs)**: `.com`, `.org`, `.net`
-    * **Country‑code TLDs (ccTLDs)**: Uses two-character country abbreviations. Eg: `.in` (India), `.uk` (United Kingdom), `.jp` (Japan). Second labels can be organizational, or they can be more specific,
-      national designations. The United States, for example, uses state abbreviations as a subdivision of us (e.g., `ca.us.`). The address `uci.ca.us.` can be translated to University of California, Irvine             university in the state of California in the United States.
-
+    * **Country‑code TLDs (ccTLDs)**: Uses two-character country abbreviations. Eg: `.in` (India), `.uk` (United Kingdom), `.jp` (Japan).
+       * Some ccTLDs use second‑level labels for further categorization.
+          * Example: The United States `.us` namespace can have state abbreviations as second‑level domains, such as `.ca.us` for California.
+          * `uci.ca.us.` translates to:
+             * `uci` → University of California, Irvine
+             * `ca` → State of California
+             * `us` → United States country code TLD
+             * `.` → Root
+     
        <img width="467" height="236" alt="image" src="https://github.com/user-attachments/assets/0a42e568-55f6-4d86-8b17-592e939950fa" />
 
       
