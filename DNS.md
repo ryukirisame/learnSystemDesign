@@ -23,9 +23,16 @@ However, remembering numeric IP addresses is difficult for humans. We prefer to 
 It's a complete set of possible domain names. A name space that maps each IP address to a unique name can be organized in two ways: flat or hierarchical.
 
 ## Flat Name Space
-In a flat name space, a name is assigned to an address. A name in this space is a sequence of characters without structure. The names may or may not have a common section; if they do, it has no meaning. 
+In a flat name space, each name is just a simple label that directly maps to an address. There’s no hierarchy or structure — it’s just a big list of unique names.
 
-The main disadvantage of a flat name space is that it cannot be used in a large system such as the Internet because it must be centrally controlled to avoid ambiguity and duplication. Also, whenever we have a scenario when something is being controlled "centrally" then we risk availability. 
+This works fine for small systems, but it quickly becomes a problem on a global scale. Without structure, the only way to prevent duplicates is to have one central authority keep track of all names.
+
+That means:
+- Scalability issues – Every new name must be checked against the global list.
+- No delegation – You can’t split the responsibility among different organizations.
+- Single point of failure – If the central authority goes down, the entire naming system is at risk.
+
+This is why the Internet uses a hierarchical naming system instead.
 
 ## Hierarchical Name Space
 In a hierarchical name space, each name is made of several parts. The parts are organized in an inverted-tree structure with the root at the top. The tree can have only 128 levels: level 0 (root) to level 127.
