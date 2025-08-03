@@ -76,7 +76,10 @@ In the hierarchical name space, a **fully qualified domain name (FQDN)** is made
  ```
 Every level in this structure is separated by a dot (`.`), and the entire sequence — including the final dot for the root — forms the **fully qualified domain name (FQDN)**.
 
-
+### Why we need hierarchical name space?
+- Scalability – No single place needs to store all names.
+- Delegation – Each part of the tree can be managed by different organizations.
+- Uniqueness – No two domains at the same level can have the same name.
 
 
 
