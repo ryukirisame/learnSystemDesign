@@ -411,40 +411,56 @@ In a **non‑recursive query**, the DNS server is asked to answer only using inf
 | **Non‑Recursive** | Client → Resolver        | Returns only cached info             | Cache checks, monitoring |
 
 
-# Anycasting
+# Anycasting and Related Communication Models 
+Before diving into Anycast, let’s briefly understand the different IP communication models:
 
-- Unicast: One‑to‑one communication.
-   - One IP address belongs to one device.
-   - Example: Your home computer → Your ISP’s DNS resolver.
+## Unicast: One-to-one communication
+Unicast is the most common type of network communication. Every device (node) gets a unique IP address, and data is sent directly to a specific destination.
 
-- Broadcast: One‑to‑all communication in a network.
-   - Example: 255.255.255.255 in IPv4.
-   
-- Multicast: One‑to‑many (only to devices subscribed to a group).
-   - Example: IPTV streams.
+### How it works
+- You want to send data to a single device.
+- The packet contains that device’s unique IP address.
+- The network routes the packet only to that device.
 
-Anycast is different — it’s one‑to‑nearest.
+If multiple people need the same data, you must send it separately to each — not efficient.
 
-Anycast is a network addressing and routing method in which incoming requests can be routed to a variety of different locations or “nodes.” In the context of a CDN, Anycast typically routes incoming traffic to the nearest data center with the capacity to process the request efficiently. Selective routing allows an Anycast network to be resilient in the face of high traffic volume, network congestion, and DDoS attacks.
+## Broadcast: One‑to‑all communication in a network.
+Broadcast means sending a packet to all devices in a network segment. It’s one sender → all receivers in the broadcast domain.
 
+### How it works
+- A special broadcast IP is used:
+   - IPv4 example: 255.255.255.255 (local broadcast)
+   - Or a subnet broadcast address: e.g., 192.168.1.255
+- Every device on the local network receives the packet.
 
-Most of the Internet works via a routing scheme called Unicast. Under Unicast, every node on the network gets a unique IP address. Home and office networks use Unicast; when a computer is connected to a wireless network and gets a message saying the IP address is already in use, an IP address conflict has occurred because another computer on the same Unicast network is already using the same IP. In most cases, that isn't allowed.
+## Multicast: One‑to‑many Communication 
+Multicast delivers data to a selected group of devices that have joined a multicast group. It’s one sender → many receivers (but not everyone).
 
-When a CDN is using a Unicast address, traffic is routed directly to the specific node. This creates a vulnerability when the network experiences extraordinary traffic such as during a DDoS attack. Because the traffic is routed directly to a particular data center, the location or its surrounding infrastructure may become overwhelmed with traffic, potentially resulting in denial-of-service to legitimate requests.
+### How it works
+- Uses reserved IP ranges:
+   - IPv4 multicast: 224.0.0.0 to 239.255.255.255
+   - IPv6 multicast: ff00::/8
+- Devices “subscribe” to a multicast group.
+- Only subscribers receive the packets.
 
-Using Anycast means the network can be extremely resilient. Because traffic will find the best path, an entire data center can be taken offline and traffic will automatically flow to a proximal data center.
+## Anycast: one‑to‑nearest communication
+Anycast is one sender → nearest (best) receiver. Multiple servers share the same IP address, and the Internet’s routing system sends traffic to the closest one.
+
+Most of the Internet works via a routing scheme called Unicast. Home and office networks use Unicast; when a computer is connected to a wireless network and gets a message saying the IP address is already in use, an IP address conflict has occurred because another computer on the same Unicast network is already using the same IP. In most cases, that isn't allowed.
+
+When a CDN node or DNS server is using a Unicast address, traffic is routed directly to the specific node. This creates a vulnerability when the network experiences extraordinary traffic such as during a DDoS attack. Because the traffic is routed directly to a particular data center, the location or its surrounding infrastructure may become overwhelmed with traffic, potentially resulting in denial-of-service to legitimate requests. That's why anycast is used instead in such cases.
+
+Anycast is a network addressing and routing method in which incoming requests can be routed to a variety of different locations or “nodes.” In the context of a CDN, Anycast typically routes incoming traffic to the nearest data center with the capacity to process the request efficiently. 
+
 
 ## How does Anycast work?
 - Multiple locations (e.g., New York, London, Tokyo) run the same service and advertise the same IP address via BGP.
-
-- When you send a request to that IP, the Internet's routing system picks the closest route (lowest network distance).
-
+- When you send a request to that IP, the Internet's routing system automatically selects the nearest/fastest server.
 - If one server goes down, BGP automatically reroutes traffic to another available server.
 
 
 ## Why Use Anycast?
 Anycast is useful when:
-
 - You want low latency for a global audience.
 - You want high availability (automatic failover).
 - You want load distribution without extra software.
@@ -463,7 +479,7 @@ DNS systems heavily use Anycast for:
 
 3. Authoritative DNS Providers
    - Providers like Cloudflare, AWS Route 53, and Akamai Anycast their authoritative name servers.
-   -Reduces query latency for websites globally.
+   - Reduces query latency for websites globally.
 
 ## Benefits of Anycast in DNS
 | Benefit               | Explanation                                                   |
