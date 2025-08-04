@@ -331,3 +331,84 @@ Browser → Connect to IP
    - Authoritative: Gives the actual IP.
 
 
+
+# Types of DNS Queries
+
+When a client asks a DNS resolver for the IP address of a domain, there are **three main query types** depending on how the resolver behaves and what information it already has.
+
+
+## 1. Recursive Query
+
+In a **recursive query**, the client (e.g., your computer’s DNS resolver) demands a complete answer from the DNS server it’s querying.
+
+* The server must either:
+  * Return the requested IP address, **or**
+  * Return an error saying the domain does not exist.
+* The client does **not** want partial information or referrals.
+
+**Example Flow:**
+
+1. Your computer asks the recursive resolver: *“What is the IP for [www.example.com?”](http://www.example.com?”)*
+2. The resolver will:
+   * Check its cache.
+   * If not found, query the Root → TLD → Authoritative servers **on your behalf**.
+3. It then returns the final IP address to you.
+
+**Key Point:**
+
+* **Recursive queries are what your computer sends to your ISP’s or public resolver.**
+* This is why the “Recursive Resolver” in DNS resolution acts as the middleman.
+
+
+## 2. Iterative Query
+
+In an **iterative query**, the DNS server is **allowed to return the best answer it has** — even if it’s not the final IP address.
+
+* If the server doesn’t know the IP, it returns a **referral** to another DNS server that might know.
+* The client then contacts that referred server, and so on, until it finds the answer.
+
+**Example Flow:**
+
+1. Recursive resolver asks the Root server: *“What is the IP for [www.example.com?”](http://www.example.com?”)*
+2. Root server replies: *“I don’t know, but here’s a `.com` TLD server you can try.”*
+3. Resolver then queries the `.com` TLD server.
+4. TLD server replies: *“I don’t know, but here’s the authoritative server for example.com.”*
+5. Resolver finally asks the authoritative server and gets the IP.
+
+**Key Point:**
+
+* **Servers in the DNS hierarchy (Root, TLD, Authoritative) respond with iterative queries**.
+* Only the recursive resolver continues the chain automatically for the client.
+
+## 3. Non‑Recursive Query
+
+In a **non‑recursive query**, the DNS server is asked to answer only using information it already has in its cache.
+
+* No additional lookups are performed.
+* If the answer is cached, it’s returned immediately.
+* If not cached, the server returns an error or a “no data” response.
+
+**Example Flow:**
+
+1. A monitoring tool checks a resolver to see if it already knows `www.example.com`.
+2. The resolver returns:
+
+   * Cached IP (if available), or
+   * “No data” if not cached.
+
+**Key Point:**
+
+* Useful when you **want to avoid extra DNS traffic**.
+* Commonly used in **performance monitoring** and **load testing**.
+
+
+## **Quick Comparison Table**
+
+| Query Type        | Who Sends It?            | What Happens if Server Doesn’t Know? | Common Use Case          |
+| ----------------- | ------------------------ | ------------------------------------ | ------------------------ |
+| **Recursive**     | Your computer → Resolver | Resolver finds the answer for you    | Everyday browsing        |
+| **Iterative**     | Resolver → Root/TLD/NS   | Server gives referral to next server | DNS resolution chain     |
+| **Non‑Recursive** | Client → Resolver        | Returns only cached info             | Cache checks, monitoring |
+
+
+
