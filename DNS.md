@@ -226,59 +226,26 @@ So in one sentence:
 
 
 
-#### Why This Works Like a Chain of Referrals
-- Each step narrows down the search:
-   - Root: Finds the right TLD.
-   - TLD: Finds the right authoritative server.
-   - Authoritative: Gives the actual IP.
 
+# DNS Resolution Process
+<img width="1360" height="680" alt="image" src="https://github.com/user-attachments/assets/96a8c2b2-0ea5-4345-87a9-b3f5c652a0bb" />
 
+## 1. User Makes a Request
+You type: `www.example.com` into your browser.
 
+## 2. Browser & OS Cache Check
 
-
-
-
-
-
-
-
-
-
-
-
-Alright ✅ — I’ll give you the **entire DNS resolution process** from start to finish, showing exactly what happens **step-by-step**, which server is queried at each step, what that server knows, and a **real-world example** you can replicate with `dig`.
-
-We’ll use **`www.example.com`** as the example domain.
-
----
-
-## **1. User Makes a Request**
-
-You type:
-
-```
-www.example.com
-```
-
-into your browser.
-
----
-
-## **2. Browser & OS Cache Check**
-
-* Browser checks its DNS cache → if found, done.
+* Browser checks its DNS cache → if found, return.
 * If not found, OS resolver cache is checked.
 * If still not found, query goes to a **recursive resolver** (ISP DNS, Google `8.8.8.8`, or Cloudflare `1.1.1.1`).
 
----
-
-## **3. Recursive Resolver Starts the Journey**
+## 3. Recursive Resolver Starts the Journey
 
 The recursive resolver does **iterative queries**.
 
 ---
 
-### **Step 1 — Query Root Name Server**
+### Step 1 — Query Root Name Server
 
 **Command example:**
 
@@ -297,9 +264,8 @@ dig @198.41.0.4 www.example.com
   ...
   ```
 
----
 
-### **Step 2 — Query TLD Server (.com)**
+### Step 2 — Query TLD Server (.com)
 
 **Command example:**
 
@@ -317,9 +283,7 @@ dig @192.5.6.30 www.example.com
   b.iana-servers.net.   199.43.133.53
   ```
 
----
-
-### **Step 3 — Query Authoritative Name Server**
+### Step 3 — Query Authoritative Name Server
 
 **Command example:**
 
@@ -335,38 +299,22 @@ dig @199.43.135.53 www.example.com
   www.example.com. 86400 IN A 93.184.216.34
   ```
 
----
-
-## **4. Recursive Resolver Caches the Answer**
+## 4. Recursive Resolver Caches the Answer
 
 * Stores it for the **TTL** (e.g., 86400 seconds = 1 day).
 * Returns the IP to your OS.
 
----
 
-## **5. OS Passes IP to Browser**
+## 5. OS Passes IP to Browser
 
 * Browser connects to `93.184.216.34` via TCP/UDP depending on protocol (HTTP → TCP, DNS over HTTPS → TLS).
-
----
 
 ## **6. Browser Loads the Website**
 
 * DNS part is done — now it’s regular HTTP(S) traffic.
 
----
 
-### **📌 Summary Table**
-
-| Step | Server Type   | Knows IP? | Returns                                    |
-| ---- | ------------- | --------- | ------------------------------------------ |
-| 1    | Root          | ❌         | List of `.com` TLD name servers            |
-| 2    | TLD (.com)    | ❌         | List of authoritative NS for `example.com` |
-| 3    | Authoritative | ✅         | IP for `www.example.com`                   |
-
----
-
-### **📌 Real Flow Recap**
+###  Real Flow Recap
 
 ```
 Browser → OS cache → Recursive Resolver
@@ -377,10 +325,10 @@ Recursive Resolver → OS → Browser
 Browser → Connect to IP
 ```
 
----
-
-If you want, I can make a **visual diagram** that shows this chain of lookups in a **clear layered flow**, so you can remember it for interviews instantly.
-
-Do you want me to make that diagram next?
+### Why This Works Like a Chain of Referrals
+- Each step narrows down the search:
+   - Root: Finds the right TLD.
+   - TLD: Finds the right authoritative server.
+   - Authoritative: Gives the actual IP.
 
 
