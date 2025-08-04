@@ -164,16 +164,198 @@ Most users rely on the recursive resolver provided by their Internet Service Pro
 
 
 ## Authoritative Name Servers
-- These know the actual DNS records for a domain.
+- An Authoritative Name Server is the DNS server that holds the actual DNS records (IP and other DNS records) for a domain.
 - It is the final source of truth in the DNS lookup process.
 - When a recursive resolver queries an authoritative server for a domain, the authoritative server returns the answer directly — typically the A record (IPv4), AAAA record (IPv6), or CNAME record for the requested host.
 - Managed by the domain owner or their DNS hosting provider(e.g., Cloudflare, AWS Route 53, GoDaddy).
 - Query to authoritative name server: “What is the IP for `www.example.com`?”
    - Authoritative server reply: “The IP for www.example.com is `93.184.216.34`.”
 
+### Subdomain & Delegation
+A subdomain is simply a label before your main domain (Second-Level Domain).
+It is part of your domain’s DNS hierarchy.
+
+- Examples:
+   - `www.example.com` → subdomain = `www`
+   - `mail.example.com` → subdomain = `mail`
+   - `blog.shop.example.com` → subdomains = `blog` (of `shop`), and `shop` (of `example.com`)
+
+
+By default, the authoritative name server will manage all the subdomains. However, we can configure this to delegate some specific subdomains to another authoritative server. So, Instead of your main authoritative servers answering, they redirect the resolver to different authoritative servers for that subdomain. The resolver then queries the delegated authoritative server for the final answer.
+
+#### Default Case (No Delegation)
+If `example.com` is managed by: `ns1.mydnsprovider.com`, then:
+- `www.example.com` will be resolved by `ns1.mydnsprovider.com`
+- `mail.example.com` will be resolved by `ns1.mydnsprovider.com`
+- `anything.example.com` will be resolved `by ns1.mydnsprovider.com`
+
+#### Delegation Case
+We can make `mail.example.com` to be resolved by another authoritative name server.
+
+
+
+
 ## Summary
 So in one sentence:
 - Root server → “Here’s who manages `.com` domains.”
 - TLD server → “Here’s who manages `example.com`.”
 - Authoritative server → “Here’s the IP for `www.example.com`.”
+
+#### Why This Works Like a Chain of Referrals
+- Each step narrows down the search:
+   - Root: Finds the right TLD.
+   - TLD: Finds the right authoritative server.
+   - Authoritative: Gives the actual IP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Alright ✅ — I’ll give you the **entire DNS resolution process** from start to finish, showing exactly what happens **step-by-step**, which server is queried at each step, what that server knows, and a **real-world example** you can replicate with `dig`.
+
+We’ll use **`www.example.com`** as the example domain.
+
+---
+
+## **1. User Makes a Request**
+
+You type:
+
+```
+www.example.com
+```
+
+into your browser.
+
+---
+
+## **2. Browser & OS Cache Check**
+
+* Browser checks its DNS cache → if found, done.
+* If not found, OS resolver cache is checked.
+* If still not found, query goes to a **recursive resolver** (ISP DNS, Google `8.8.8.8`, or Cloudflare `1.1.1.1`).
+
+---
+
+## **3. Recursive Resolver Starts the Journey**
+
+The recursive resolver does **iterative queries**.
+
+---
+
+### **Step 1 — Query Root Name Server**
+
+**Command example:**
+
+```bash
+dig @198.41.0.4 www.example.com
+```
+
+* `198.41.0.4` is **A.ROOT-SERVERS.NET** (one of the 13 root servers).
+* **Question:** “What is the IP of `www.example.com`?”
+* **Root Answer:**
+  “I don’t know the IP, but `.com` is managed by these TLD name servers:”
+
+  ```
+  a.gtld-servers.net.  192.5.6.30
+  b.gtld-servers.net.  192.33.14.30
+  ...
+  ```
+
+---
+
+### **Step 2 — Query TLD Server (.com)**
+
+**Command example:**
+
+```bash
+dig @192.5.6.30 www.example.com
+```
+
+* `192.5.6.30` is **A.GTLD-SERVERS.NET** (one of `.com`’s TLD servers).
+* **Question:** “What is the IP of `www.example.com`?”
+* **TLD Answer:**
+  “I don’t know the IP, but `example.com` is managed by these authoritative name servers:”
+
+  ```
+  a.iana-servers.net.   199.43.135.53
+  b.iana-servers.net.   199.43.133.53
+  ```
+
+---
+
+### **Step 3 — Query Authoritative Name Server**
+
+**Command example:**
+
+```bash
+dig @199.43.135.53 www.example.com
+```
+
+* `199.43.135.53` is **A.IANA-SERVERS.NET** (authoritative for `example.com`).
+* **Question:** “What is the IP of `www.example.com`?”
+* **Authoritative Answer:**
+
+  ```
+  www.example.com. 86400 IN A 93.184.216.34
+  ```
+
+---
+
+## **4. Recursive Resolver Caches the Answer**
+
+* Stores it for the **TTL** (e.g., 86400 seconds = 1 day).
+* Returns the IP to your OS.
+
+---
+
+## **5. OS Passes IP to Browser**
+
+* Browser connects to `93.184.216.34` via TCP/UDP depending on protocol (HTTP → TCP, DNS over HTTPS → TLS).
+
+---
+
+## **6. Browser Loads the Website**
+
+* DNS part is done — now it’s regular HTTP(S) traffic.
+
+---
+
+### **📌 Summary Table**
+
+| Step | Server Type   | Knows IP? | Returns                                    |
+| ---- | ------------- | --------- | ------------------------------------------ |
+| 1    | Root          | ❌         | List of `.com` TLD name servers            |
+| 2    | TLD (.com)    | ❌         | List of authoritative NS for `example.com` |
+| 3    | Authoritative | ✅         | IP for `www.example.com`                   |
+
+---
+
+### **📌 Real Flow Recap**
+
+```
+Browser → OS cache → Recursive Resolver
+Recursive Resolver → Root Server (.com info)
+Recursive Resolver → .com TLD Server (example.com NS info)
+Recursive Resolver → Authoritative NS (IP info)
+Recursive Resolver → OS → Browser
+Browser → Connect to IP
+```
+
+---
+
+If you want, I can make a **visual diagram** that shows this chain of lookups in a **clear layered flow**, so you can remember it for interviews instantly.
+
+Do you want me to make that diagram next?
+
 
