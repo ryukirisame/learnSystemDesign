@@ -230,20 +230,20 @@ So in one sentence:
 # DNS Resolution Process
 <img width="1360" height="680" alt="image" src="https://github.com/user-attachments/assets/96a8c2b2-0ea5-4345-87a9-b3f5c652a0bb" />
 
+When you type www.example.com into your browser, your computer needs to translate it into an IP address (e.g., 93.184.216.34). This happens in several steps:
+
 ## 1. User Makes a Request
-You type: `www.example.com` into your browser.
+You enter `www.example.com` into your browser’s address bar and press Enter.
 
 ## 2. Browser & OS Cache Check
 
-* Browser checks its DNS cache → if found, return.
+* Browser checks its DNS cache. If found, return the IP.
 * If not found, OS resolver cache is checked.
-* If still not found, query goes to a **recursive resolver** (ISP DNS, Google `8.8.8.8`, or Cloudflare `1.1.1.1`).
+* If still not found, the query is sent to a recursive resolver (e.g., ISP DNS, Google `8.8.8.8`, Cloudflare `1.1.1.1`).
 
-## 3. Recursive Resolver Starts the Journey
+## 3. Recursive Resolver Begins the Lookup
 
-The recursive resolver does **iterative queries**.
-
-
+The recursive resolver performs iterative queries, moving down the DNS hierarchy until it finds the IP address.
 
 ### Step 1 — Query Root Name Server
 
@@ -256,7 +256,7 @@ dig @198.41.0.4 www.example.com
 * `198.41.0.4` is **A.ROOT-SERVERS.NET** (one of the 13 root servers).
 * **Question:** “What is the IP of `www.example.com`?”
 * **Root Answer:**
-  “I don’t know the IP, but `.com` is managed by these TLD name servers:”
+  “I don’t know the IP, but `.com` domains are handled by these TLD name servers:”
 
   ```
   a.gtld-servers.net.  192.5.6.30
@@ -265,7 +265,7 @@ dig @198.41.0.4 www.example.com
   ```
 
 
-### Step 2 — Query TLD Server (.com)
+### Step 2 — Query the TLD Name Server (.com)
 
 **Command example:**
 
@@ -283,7 +283,7 @@ dig @192.5.6.30 www.example.com
   b.iana-servers.net.   199.43.133.53
   ```
 
-### Step 3 — Query Authoritative Name Server
+### Step 3 — Query the Authoritative Name Server
 
 **Command example:**
 
@@ -301,7 +301,7 @@ dig @199.43.135.53 www.example.com
 
 ## 4. Recursive Resolver Caches the Answer
 
-* Stores it for the **TTL** (e.g., 86400 seconds = 1 day).
+* Stores the result for the record’s TTL (e.g., 86400 seconds = 1 day).
 * Returns the IP to your OS.
 
 
@@ -312,7 +312,6 @@ dig @199.43.135.53 www.example.com
 ## **6. Browser Loads the Website**
 
 * DNS part is done — now it’s regular HTTP(S) traffic.
-
 
 ###  Real Flow Recap
 
