@@ -187,10 +187,22 @@ By default, the authoritative name server will manage all the subdomains. Howeve
 If `example.com` is managed by: `ns1.mydnsprovider.com`, then:
 - `www.example.com` will be resolved by `ns1.mydnsprovider.com`
 - `mail.example.com` will be resolved by `ns1.mydnsprovider.com`
-- `anything.example.com` will be resolved `by ns1.mydnsprovider.com`
+- `anything.example.com` will be resolved by `ns1.mydnsprovider.com`
 
 #### Delegation Case
-We can make `mail.example.com` to be resolved by another authoritative name server.
+How it works:
+1. The example.com authoritative server stores NS records for blog.example.com pointing to the delegated authoritative server’s IPs.
+2. When a recursive resolver asks the example.com server about blog.example.com, it responds with the NS records for that subdomain instead of an IP address.
+3. The resolver then queries the delegated authoritative server for the final answer.
+
+As for other subdomains like `www.example.com`, the main authoritative server will still serve the IP address.
+
+#### Why would you delegate a subdomain?
+- Different service provider manages it
+   - Example: Your website is on AWS, but your email service is hosted by Microsoft 365 → you might delegate `mail.example.com` to Microsoft’s DNS.
+- Different team manages a part of your domain
+   - Example: Your dev team controls `dev.example.com` independently.
+
 
 
 
