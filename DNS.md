@@ -191,8 +191,8 @@ If `example.com` is managed by: `ns1.mydnsprovider.com`, then:
 
 #### Delegation Case
 How it works:
-1. The example.com authoritative server stores NS records for blog.example.com pointing to the delegated authoritative server’s IPs.
-2. When a recursive resolver asks the example.com server about blog.example.com, it responds with the NS records for that subdomain instead of an IP address.
+1. The `example.com` authoritative server stores NS records for `blog.example.com` pointing to the delegated authoritative server’s IPs.
+2. When a recursive resolver asks the `example.com` server about `blog.example.com`, it responds with the NS records for that subdomain instead of an IP address.
 3. The resolver then queries the delegated authoritative server for the final answer.
 
 As for other subdomains like `www.example.com`, the main authoritative server will still serve the IP address.
@@ -202,16 +202,28 @@ As for other subdomains like `www.example.com`, the main authoritative server wi
    - Example: Your website is on AWS, but your email service is hosted by Microsoft 365 → you might delegate `mail.example.com` to Microsoft’s DNS.
 - Different team manages a part of your domain
    - Example: Your dev team controls `dev.example.com` independently.
-
-
-
-
+- Third‑party services
+   - Example: A blog platform manages `blog.example.com`.
 
 ## Summary
 So in one sentence:
 - Root server → “Here’s who manages `.com` domains.”
 - TLD server → “Here’s who manages `example.com`.”
 - Authoritative server → “Here’s the IP for `www.example.com`.”
+
+
+
+
+|Record Type|Purpose|Example
+A Record | Maps domain names to IPv4 addresses | example.com → 192.0.2.1
+AAAA Record	|Maps domain names to IPv6 addresses	|example.com → 2606:2800:220:1:248:1893:25c8:1946
+CNAME Record	|Creates aliases pointing to other domain names	|www.example.com → example.com
+MX Record	|Specifies mail servers for email routing	|example.com → mail.example.com
+NS Record	|Identifies authoritative name servers for a domain	|example.com → ns1.example.com
+TXT Record	|Stores text information for various purposes	|Used for SPF, DKIM, domain verification
+PTR Record	|Performs reverse DNS lookups (IP to domain)	|192.0.2.1 → example.com
+
+
 
 #### Why This Works Like a Chain of Referrals
 - Each step narrows down the search:
