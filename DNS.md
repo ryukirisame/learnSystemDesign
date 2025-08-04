@@ -444,26 +444,19 @@ Multicast delivers data to a selected group of devices that have joined a multic
 - Only subscribers receive the packets.
 
 ## Anycast: one‑to‑nearest communication
-Anycast is one sender → nearest (best) receiver. Multiple servers share the same IP address, and the Internet’s routing system sends traffic to the closest one.
+Anycast is a network routing technique where multiple servers in different locations share the same IP address. When a client sends a request to that IP, the Internet’s routing system (BGP) automatically directs the traffic to the nearest or best‑performing server. If one server becomes unavailable, traffic is rerouted to another available server without any change required on the client side.
 
+Anycast is widely used in DNS (root servers, public resolvers, authoritative servers) and CDNs to reduce latency, increase availability, and naturally distribute load.
+
+### Why we need anycast
 Most of the Internet works via a routing scheme called Unicast. Home and office networks use Unicast; when a computer is connected to a wireless network and gets a message saying the IP address is already in use, an IP address conflict has occurred because another computer on the same Unicast network is already using the same IP. In most cases, that isn't allowed.
 
 When a CDN node or DNS server is using a Unicast address, traffic is routed directly to the specific node. This creates a vulnerability when the network experiences extraordinary traffic such as during a DDoS attack. Because the traffic is routed directly to a particular data center, the location or its surrounding infrastructure may become overwhelmed with traffic, potentially resulting in denial-of-service to legitimate requests. That's why anycast is used instead in such cases.
-
-Anycast is a network addressing and routing method in which incoming requests can be routed to a variety of different locations or “nodes.” In the context of a CDN, Anycast typically routes incoming traffic to the nearest data center with the capacity to process the request efficiently. 
-
 
 ## How does Anycast work?
 - Multiple locations (e.g., New York, London, Tokyo) run the same service and advertise the same IP address via BGP.
 - When you send a request to that IP, the Internet's routing system automatically selects the nearest/fastest server.
 - If one server goes down, BGP automatically reroutes traffic to another available server.
-
-
-## Why Use Anycast?
-Anycast is useful when:
-- You want low latency for a global audience.
-- You want high availability (automatic failover).
-- You want load distribution without extra software.
 
 ## Anycast in DNS
 DNS systems heavily use Anycast for:
