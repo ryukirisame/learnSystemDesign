@@ -122,4 +122,29 @@ Every level in this structure is separated by a dot (`.`), and the entire sequen
 - Uniqueness – No two domains at the same level can have the same name.
 
 
+# Types of DNS Servers
 
+1. Recursive Resolver
+2. Root Name Server
+3. TLD (Top-Level Domain) Name Server
+4. Authoritative Name Server
+
+<img width="1080"  alt="image" src="https://github.com/user-attachments/assets/8cb68834-f595-49f4-88c0-034543b941c1" />
+
+## Recursive Resolvers (DNS Resolvers)
+
+A recursive resolver — also called a DNS Resolver — is the DNS server that receives queries directly from client devices, such as your computer or smartphone. Its main role is to find the answer to the client’s query by contacting other DNS servers if needed.
+
+If the resolver already has the answer stored in its cache (from a recent lookup), it can return it immediately. Otherwise, it will query other DNS servers — such as the Root Name Server, TLD Name Server, and Authoritative Name Server — to get the result.
+
+Most users rely on the recursive resolver provided by their Internet Service Provider (ISP), but there are also public alternatives, such as:
+- Cloudflare (1.1.1.1)
+- Google Public DNS (8.8.8.8)
+- OpenDNS (208.67.222.222)
+
+
+## Root Name Server
+- Root Name Server doesn't know the IP address of the domain. They only know which TLD name servers (e.g., .com, .org, .net) are responsible for that domain.
+- A root server accepts a recursive resolver’s query which includes a domain name, and the root nameserver responds by directing the recursive resolver to a TLD nameserver, based on the extension of that domain (.com, .net, .org, etc.).
+- Example: Recursive resolver asks: "What is the IP for www.example.com?"
+  - Root server replies: “I don’t know the IP, but .com TLD servers can help you. Here are their IPs for .com TLD servers.”
