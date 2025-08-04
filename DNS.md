@@ -485,4 +485,63 @@ DNS systems heavily use Anycast for:
 
 
 ## How does an Anycast network mitigate a DDoS attack?
+Here’s how **Anycast** helps mitigate a DDoS attack:
+
+---
+
+## **How Anycast Mitigates a DDoS Attack**
+
+1. **Traffic is Distributed Across Many Locations**
+
+   * In Anycast, the same IP address is announced from multiple data centers worldwide.
+   * When a DDoS attack targets that IP, the attack traffic is **automatically split** across all those locations instead of concentrating on a single server.
+
+2. **Attack Load is Localized**
+
+   * Because each attacker is routed to the **nearest** Anycast node (based on network routing), no single location gets the full volume of the attack.
+   * Example: Attackers in Asia will hit Asian data centers, attackers in Europe will hit European data centers.
+
+3. **Overwhelmed Nodes Can Withdraw from Routing**
+
+   * If one data center becomes overloaded, it can **stop advertising** the Anycast IP via BGP.
+   * Traffic is then re‑routed to other available data centers.
+
+4. **Legitimate Traffic Can Still Get Through**
+
+   * Even during a massive attack, users who are near healthy Anycast nodes can still reach the service.
+   * This improves availability compared to Unicast, where one overloaded location could take the whole service down.
+
+
+### **Visual Example**
+
+Imagine 3 Anycast locations:
+
+* **New York**
+* **London**
+* **Tokyo**
+
+If 90 million attack packets come in:
+
+* New York: Handles \~30M
+* London: Handles \~30M
+* Tokyo: Handles \~30M
+
+Instead of **one server** choking on all 90M, **each handles a fraction**.
+If New York fails, traffic from that region gets rerouted to London or Tokyo.
+
+
+### Note: Anycast reduces the blast radius of a DDoS but doesn’t make you invulnerable.
+
+### Some situations when Anycast won't save you from DDoS
+
+1. Anycast can spread the load across locations, but each location still has a finite amount of bandwidth to the internet.
+   - Example: Your London data center has a 10 Gbps connection. If attackers send 20 Gbps worth of packets from sources near London → That link is saturated, users in that region lose service.
+2. When the Attack Is Sourced from a Single Geographic Region.
+   - If most of the attacking machines are in one geographic area, then most of the attack traffic will hit only one Anycast node.
+   - That node might still get overwhelmed, and users in that region might see downtime. 
+3. If the Attack Targets Your Origin or Backend
+   - If the Anycast node has to fetch content from a single origin server, and the attacker floods the origin, you can still go down.
+   - Example: Your CDN edge servers are Anycasted, but your origin web server is a single Unicast IP — attackers flood the origin directly.
+
+
 
