@@ -411,4 +411,69 @@ In a **non‑recursive query**, the DNS server is asked to answer only using inf
 | **Non‑Recursive** | Client → Resolver        | Returns only cached info             | Cache checks, monitoring |
 
 
+# Anycasting
+
+- Unicast: One‑to‑one communication.
+   - One IP address belongs to one device.
+   - Example: Your home computer → Your ISP’s DNS resolver.
+
+- Broadcast: One‑to‑all communication in a network.
+   - Example: 255.255.255.255 in IPv4.
+   
+- Multicast: One‑to‑many (only to devices subscribed to a group).
+   - Example: IPTV streams.
+
+Anycast is different — it’s one‑to‑nearest.
+
+Anycast is a network addressing and routing method in which incoming requests can be routed to a variety of different locations or “nodes.” In the context of a CDN, Anycast typically routes incoming traffic to the nearest data center with the capacity to process the request efficiently. Selective routing allows an Anycast network to be resilient in the face of high traffic volume, network congestion, and DDoS attacks.
+
+
+Most of the Internet works via a routing scheme called Unicast. Under Unicast, every node on the network gets a unique IP address. Home and office networks use Unicast; when a computer is connected to a wireless network and gets a message saying the IP address is already in use, an IP address conflict has occurred because another computer on the same Unicast network is already using the same IP. In most cases, that isn't allowed.
+
+When a CDN is using a Unicast address, traffic is routed directly to the specific node. This creates a vulnerability when the network experiences extraordinary traffic such as during a DDoS attack. Because the traffic is routed directly to a particular data center, the location or its surrounding infrastructure may become overwhelmed with traffic, potentially resulting in denial-of-service to legitimate requests.
+
+Using Anycast means the network can be extremely resilient. Because traffic will find the best path, an entire data center can be taken offline and traffic will automatically flow to a proximal data center.
+
+## How does Anycast work?
+- Multiple locations (e.g., New York, London, Tokyo) run the same service and advertise the same IP address via BGP.
+
+- When you send a request to that IP, the Internet's routing system picks the closest route (lowest network distance).
+
+- If one server goes down, BGP automatically reroutes traffic to another available server.
+
+
+## Why Use Anycast?
+Anycast is useful when:
+
+- You want low latency for a global audience.
+- You want high availability (automatic failover).
+- You want load distribution without extra software.
+
+## Anycast in DNS
+DNS systems heavily use Anycast for:
+
+1. Root Servers
+   - There are 13 logical root servers (A–M).
+   - In reality, there are hundreds of physical instances around the world.
+   - Anycast makes all instances of "A.ROOT-SERVERS.NET" reachable at the same IP.
+
+2. Public DNS Providers
+   - Google (8.8.8.8), Cloudflare (1.1.1.1), Quad9 (9.9.9.9) are all Anycasted.
+   - This ensures fast DNS lookups regardless of where you are.
+
+3. Authoritative DNS Providers
+   - Providers like Cloudflare, AWS Route 53, and Akamai Anycast their authoritative name servers.
+   -Reduces query latency for websites globally.
+
+## Benefits of Anycast in DNS
+| Benefit               | Explanation                                                   |
+| --------------------- | ------------------------------------------------------------- |
+| **Lower Latency**     | You always hit the nearest DNS node.                          |
+| **Load Distribution** | Requests are naturally spread across multiple nodes.          |
+| **Resilience**        | If one node fails, traffic is automatically routed elsewhere. |
+| **DDoS Mitigation**   | Large attacks are spread over many global servers.            |
+
+
+
+## How does an Anycast network mitigate a DDoS attack?
 
