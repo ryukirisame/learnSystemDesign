@@ -147,4 +147,6 @@ Most users rely on the recursive resolver provided by their Internet Service Pro
 - Root Name Server doesn't know the IP address of the domain. They only know which TLD name servers (e.g., .com, .org, .net) are responsible for that domain.
 - A root server accepts a recursive resolver’s query which includes a domain name, and the root nameserver responds by directing the recursive resolver to a TLD nameserver, based on the extension of that domain (.com, .net, .org, etc.).
 - Example: Recursive resolver asks: "What is the IP for www.example.com?"
-  - Root server replies: “I don’t know the IP, but .com TLD servers can help you. Here are their IPs for .com TLD servers.”
+  - Root server replies: “I don’t know the IP, but `.com` TLD servers can help you. Here are their IPs for `.com` TLD servers.”
+- There are 13 **sets** of name servers known to every recursive resolvers. Please note that the 13 name servers are logical. For each one of them, they have multiple servers distributed around the globe.
+- All the root name servers use anycast technology to provide redundancy and performance optimization. 
