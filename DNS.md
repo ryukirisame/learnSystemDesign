@@ -149,4 +149,31 @@ Most users rely on the recursive resolver provided by their Internet Service Pro
 - Example: Recursive resolver asks: "What is the IP for www.example.com?"
   - Root server replies: “I don’t know the IP, but `.com` TLD servers can help you. Here are their IPs for `.com` TLD servers.”
 - There are 13 **sets** of name servers known to every recursive resolvers. Please note that the 13 name servers are logical. For each one of them, they have multiple servers distributed around the globe.
+- The root nameservers are overseen by a nonprofit called the Internet Corporation for Assigned Names and Numbers (ICANN).
 - All the root name servers use anycast technology to provide redundancy and performance optimization. 
+
+
+## TLD Name Servers
+- TLD name servers stores information about all domains under a specific TLD (.com, .org, .net, .in, etc.).
+- They don’t know your website’s IP either. They only know which authoritative name servers are responsible for that domain. So basically a `.com` TLD server will store authoritative name servers IP of all the domains that ends with `.com`.
+- They store: NS records (name server records) telling where to find authoritative servers for domains under that TLD.
+- Query to TLD server: “What is the IP of www.example.com?”
+   - TLD Server Response: “I don’t know the IP. But I know which authoritative name servers handle `example.com`. Here’s their list.”
+- When you query a `com` TLD server for `www.example.com`, it matches that request against its database, finds the entry for `example.com`, and returns the NS records.
+- Management of TLD nameservers is handled by the Internet Assigned Numbers Authority (IANA), which is a branch of ICANN.
+
+
+## Authoritative Name Servers
+- These know the actual DNS records for a domain.
+- It is the final source of truth in the DNS lookup process.
+- When a recursive resolver queries an authoritative server for a domain, the authoritative server returns the answer directly — typically the A record (IPv4), AAAA record (IPv6), or CNAME record for the requested host.
+- Managed by the domain owner or their DNS hosting provider(e.g., Cloudflare, AWS Route 53, GoDaddy).
+- Query to authoritative name server: “What is the IP for `www.example.com`?”
+   - Authoritative server reply: “The IP for www.example.com is `93.184.216.34`.”
+
+## Summary
+So in one sentence:
+- Root server → “Here’s who manages `.com` domains.”
+- TLD server → “Here’s who manages `example.com`.”
+- Authoritative server → “Here’s the IP for `www.example.com`.”
+
