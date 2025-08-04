@@ -243,7 +243,7 @@ You type: `www.example.com` into your browser.
 
 The recursive resolver does **iterative queries**.
 
----
+
 
 ### Step 1 — Query Root Name Server
 
