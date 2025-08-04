@@ -212,16 +212,17 @@ So in one sentence:
 - Authoritative server → “Here’s the IP for `www.example.com`.”
 
 
+# Common DNS Record Types
 
-
-|Record Type|Purpose|Example
-A Record | Maps domain names to IPv4 addresses | example.com → 192.0.2.1
-AAAA Record	|Maps domain names to IPv6 addresses	|example.com → 2606:2800:220:1:248:1893:25c8:1946
-CNAME Record	|Creates aliases pointing to other domain names	|www.example.com → example.com
-MX Record	|Specifies mail servers for email routing	|example.com → mail.example.com
-NS Record	|Identifies authoritative name servers for a domain	|example.com → ns1.example.com
-TXT Record	|Stores text information for various purposes	|Used for SPF, DKIM, domain verification
-PTR Record	|Performs reverse DNS lookups (IP to domain)	|192.0.2.1 → example.com
+| Record Type | Purpose | Example |
+|-------------|---------|---------|
+| A Record | Maps domain names to IPv4 addresses | `example.com` → `192.0.2.1` |
+| AAAA Record	| Maps domain names to IPv6 addresses	| `example.com` → `2606:2800:220:1:248:1893:25c8:1946` |
+| CNAME Record	| Creates aliases pointing to other domain names | `www.example.com` → `example.com` | 
+| MX Record	| Specifies mail servers for email routing | `example.com` → `mail.example.com` |
+| NS Record	| Identifies authoritative name servers for a domain	| `example.com` → `ns1.example.com` |
+| TXT Record	| Stores text information for various purposes	| Used for SPF, DKIM, domain verification |
+| PTR Record	| Performs reverse DNS lookups (IP to domain)	| `192.0.2.1` → `example.com` |
 
 
 
