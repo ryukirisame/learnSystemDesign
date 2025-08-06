@@ -545,49 +545,17 @@ If New York fails, traffic from that region gets rerouted to London or Tokyo.
 
 
 # GeoDNS
-GeoDNS (Geographic DNS) is a **DNS-based traffic routing technique** that directs users to different servers or IP addresses based on their geographic location.
-
-GeoDNS is a DNS technique where the DNS server gives different IP addresses to users depending on their geographic location.
-
-## How GeoDNS Works
-- A DNS provider configures multiple DNS records for the same domain — each pointing to a different server in a different region.
-- When a user’s recursive resolver queries the authoritative DNS server:
-   - The DNS system checks the user’s IP address (or the resolver’s IP) to guess their geographic location.
-   - It responds with the IP address of the closest or most appropriate server for that location.
-
-
-## Key Limitation
-GeoDNS uses the IP address of the DNS resolver (not always the user’s actual IP) to determine location.
-- In most cases, this is accurate because resolvers are near users.
-- But if a user’s resolver is far from them (e.g., using Google DNS 8.8.8.8 in another country), GeoDNS might give a suboptimal server.
-
-
-- they solve a similar problem (sending users to the “best” server) but they work at different layers and in different ways.
-
-| **Feature**               | **GeoDNS**                                                                                                                            | **Anycast**                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Layer**                 | **DNS layer** – chooses an **IP address** to return in DNS response.                                                                  | **IP routing layer (BGP)** – chooses which **physical server** to route packets to.        |
-| **What happens**          | When a user asks DNS for `example.com`, GeoDNS looks at the requester’s location and returns **different IPs** for different regions. | All servers share the **same IP address**; BGP routes the user to the nearest/fastest one. |
-| **IP address per region** | Yes – different IPs for different regions.                                                                                            | No – same IP globally.                                                                     |
-| **Decision point**        | Decision made at the **DNS resolution step**.                                                                                         | Decision made at **packet routing step** after DNS resolution.                             |
-
-
-
-
-- GeoDNS → Happens first during DNS resolution. It decides which IP address to give to the client based on their location.
-
-- Anycast → Happens after DNS resolution, when the client tries to connect to that IP. The Internet’s routing system decides which physical server (among many sharing that IP) the request actually goes to.
-
 
 GeoDNS is a DNS technique where the authoritative DNS server returns different IP addresses for the same domain, depending on the geographic location of the DNS resolver making the request.
 
-How it works:
+## How it works:
 - For a single domain name, multiple IP addresses (usually pointing to servers in different regions) are stored in the authoritative DNS. 
 - When a recursive resolver queries the authoritative DNS for that domain, the GeoDNS system determines the resolver’s approximate location using its (resolvers) IP address.
 - Based on that location, GeoDNS responds with the IP address of the server closest to the resolver.
 
-
-How DNS and Anycast are different:
+## How DNS and Anycast are different:
+- They solve a similar problem (sending users to the “best” server) but they work at different layers and in different ways.
+  
 1. Step 1 - DNS Phase 
    - When the user requests a domain, GeoDNS chooses the best IP address to give back based on location.
    - Example: A user in India might get the IP address of the Asia data center.
@@ -597,16 +565,17 @@ How DNS and Anycast are different:
    - If that IP is Anycasted, it’s actually being advertised by multiple physical servers in the same region (or globally).
    - BGP routing will automatically direct the request to the nearest or most available of those servers.
 
+- GeoDNS → Happens first during DNS resolution. It decides which IP address to give to the client based on their location.
+- Anycast → Happens after DNS resolution, when the client tries to connect to that IP. The Internet’s routing system decides which physical server (among many sharing that IP) the request actually goes to.
 
-GeoDNS: Makes the DNS-level decision → “Which region should this user talk to?”
+## Key Limitation
+GeoDNS uses the IP address of the DNS resolver (not always the user’s actual IP) to determine location.
+- In most cases, this is accurate because resolvers are near users.
+- But if a user’s resolver is far from them (e.g., using Google DNS 8.8.8.8 in another country), GeoDNS might give a suboptimal server.
 
-Anycast: Makes the network-level decision → “Which physical server in that region (or globally) should handle this request?”
+## Example Flow: Visiting a Website with GeoDNS + Anycast
 
-
-
-## **Example: Visiting a Website with GeoDNS + Anycast**
-
-### **Scenario**
+### Scenario
 
 You’re in **Mumbai, India** and want to visit `www.example.com`.
 The company hosting this site has:
@@ -615,43 +584,32 @@ The company hosting this site has:
 * **GeoDNS** to send users to the closest region
 * **Anycast** within each region to spread traffic among multiple physical servers
 
+### Step-by-step flow
 
-### **Step-by-step flow**
-
-#### **1. User types URL in browser**
+#### 1. User types URL in browser
 
 You type `www.example.com` into your browser.
 
-
-
-#### **2. Local DNS caching check**
+#### 2. Local DNS caching check
 
 * Browser → OS → Local DNS cache checked.
 * If no cached entry → request goes to your **recursive resolver** (likely your ISP’s DNS server).
 
-
-
-#### **3. Recursive resolver queries authoritative DNS**
+#### 3. Recursive resolver queries authoritative DNS
 
 * The resolver asks the authoritative DNS for `www.example.com`.
 
-
-
-#### **4. GeoDNS makes the DNS decision**
+#### 4. GeoDNS makes the DNS decision
 
 * The authoritative DNS server sees that the query comes from your ISP’s IP (Mumbai-based).
 * GeoDNS decides: “Send them to the **Asia region**.”
 * Returns IP: `203.0.113.10` (Asia region Anycast IP).
 
-
-
-#### **5. Browser starts the HTTP(S) request**
+#### 5. Browser starts the HTTP(S) request
 
 * Your browser now knows it needs to connect to `203.0.113.10`.
 
-
-
-#### **6. Anycast makes the network decision**
+#### 6. Anycast makes the network decision
 
 * `203.0.113.10` is Anycasted across multiple Asia servers:
 
@@ -661,24 +619,18 @@ You type `www.example.com` into your browser.
 * Your ISP sends the packet toward `203.0.113.10`.
 * **BGP routing** finds the shortest path → chooses **Mumbai Server A**.
 
-
-
-#### **7. Website loads from nearest server**
+#### 7. Website loads from nearest server
 
 * Your browser establishes a TCP/HTTPS connection with **Mumbai Server A**.
 * Server sends back the web page.
 * Latency is minimal because the server is geographically close.
 
-
-
-### **If a failure happens**
+### If a failure happens
 
 * If Mumbai Server A fails, the Anycast route for Mumbai stops being advertised via BGP.
 * Your next packets automatically go to the next closest Asia server (Singapore).
 
-
-
-✅ **Summary:**
+### **Summary:**
 
 * **GeoDNS:** Picked the **right region** (Asia).
 * **Anycast:** Picked the **best server** inside that region.
