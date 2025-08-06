@@ -544,4 +544,19 @@ If New York fails, traffic from that region gets rerouted to London or Tokyo.
    - Example: Your CDN edge servers are Anycasted, but your origin web server is a single Unicast IP — attackers flood the origin directly.
 
 
+# GeoDNS
+GeoDNS (Geographic DNS) is a **DNS-based traffic routing technique** that directs users to different servers or IP addresses based on their geographic location.
+
+## How GeoDNS Works
+- A DNS provider configures multiple DNS records for the same domain — each pointing to a different server in a different region.
+- When a user’s recursive resolver queries the authoritative DNS server:
+   - The DNS system checks the user’s IP address (or the resolver’s IP) to guess their geographic location.
+   - It responds with the IP address of the closest or most appropriate server for that location.
+
+
+## Key Limitation
+GeoDNS uses the IP address of the DNS resolver (not always the user’s actual IP) to determine location.
+- In most cases, this is accurate because resolvers are near users.
+- But if a user’s resolver is far from them (e.g., using Google DNS 8.8.8.8 in another country), GeoDNS might give a suboptimal server.
+
 
