@@ -636,9 +636,50 @@ You type `www.example.com` into your browser.
 * **Anycast:** Picked the **best server** inside that region.
 
 
+# How CDN works together with DNS
+
+When you set up your CDN (Cloudflare, Akamai, Fastly, etc.), you configure your domain’s authoritative DNS to point traffic to the CDN.
+
+This usually happens in two ways:
+1. CNAME method (most common for partial CDN)
+   - `www.example.com → CNAME → www.example.com.cdnprovider.net`
+   - This means: “If you want www.example.com, actually go ask CDN’s DNS system.”
+2. Nameserver delegation method (full CDN)
+   - You change your domain’s NS records to point to CDN’s authoritative name servers directly.
+   - This means your CDN becomes your authoritative DNS for that domain.
+
+
+
+## CDN’s authoritative DNS answers
+The CDN’s DNS now:
+- Looks at the resolver’s IP address (GeoDNS)
+- Decides which edge location is best for you
+- Returns that edge’s IP address (often Anycasted)
+
+The original authoritative DNS either:
+- Points you to the CDN’s authoritative DNS (via CNAME), or
+- Is replaced by the CDN’s authoritative DNS (via NS delegation).
 
 
 
 
+Yes — exactly ✅.
+
+When your **main authoritative DNS** returns a **CNAME** pointing to the CDN’s hostname (e.g., `cdn123.cdnprovider.net`), the resolver:
+
+1. **Pauses** the original query.
+2. **Starts a new DNS resolution process** for `cdn123.cdnprovider.net`:
+
+   ```
+   Root → TLD (.net) → CDN's Authoritative DNS → IP (A/AAAA record)
+   ```
+3. Returns the IP from the CDN’s authoritative server to your browser.
+
+So in **CNAME method**, the resolver essentially performs **two DNS lookups**:
+
+* **First** for your domain → gets the **CNAME**.
+* **Second** for the CDN hostname in the CNAME → gets the **IP address**.
+
+That’s why **CNAME introduces one extra DNS lookup** compared to **NS delegation**.
 
 
