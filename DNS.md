@@ -122,7 +122,7 @@ Every level in this structure is separated by a dot (`.`), and the entire sequen
 - Uniqueness – No two domains at the same level can have the same name.
 
 
-# `www` vs Other Subdomains in DNS**
+# `www` vs Other Subdomains in DNS
 * The subdomain part is mainly for service separation under the same main domain.
 * `www` is just a **subdomain** of the main domain (`example.com`), like `mail.example.com`, `api.example.com`, etc.
 * DNS treats all subdomains **equally** — no special meaning for `www`.
