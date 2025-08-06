@@ -650,36 +650,166 @@ This usually happens in two ways:
 
 
 
-## CDN’s authoritative DNS answers
-The CDN’s DNS now:
-- Looks at the resolver’s IP address (GeoDNS)
-- Decides which edge location is best for you
-- Returns that edge’s IP address (often Anycasted)
+## **Step‑by‑Step: CDN Domain Resolution**
 
-The original authoritative DNS either:
-- Points you to the CDN’s authoritative DNS (via CNAME), or
-- Is replaced by the CDN’s authoritative DNS (via NS delegation).
+Let’s say:
 
+* Your website: **`www.example.com`**
+* CDN provider: **CloudCDN**
+* CDN’s edge domain: **`cdn.cloudcdn.net`**
+* CDN’s authoritative NS: `ns1.cloudcdn.net`, `ns2.cloudcdn.net`
 
 
 
-Yes — exactly ✅.
+## **Case 1 — NS Delegation to CDN**
 
-When your **main authoritative DNS** returns a **CNAME** pointing to the CDN’s hostname (e.g., `cdn123.cdnprovider.net`), the resolver:
+### **Step 0 — User request**
 
-1. **Pauses** the original query.
-2. **Starts a new DNS resolution process** for `cdn123.cdnprovider.net`:
+1. Browser requests `www.example.com`.
+2. Browser → checks **browser cache**. If miss, goes to OS DNS cache.
+3. OS sends query to **recursive resolver** (ISP’s resolver, Google 8.8.8.8, Cloudflare 1.1.1.1).
+
+
+### **Step 1 — Resolver asks root**
+
+4. Resolver → queries **root server**: “What’s the NS for `example.com`?”
+5. Root replies: “Ask `.com` TLD servers” and gives `.com` TLD NS list.
+
+
+
+### **Step 2 — Resolver asks `.com` TLD**
+
+6. Resolver → queries `.com` TLD: “What’s the NS for `example.com`?”
+7. `.com` TLD replies:
 
    ```
-   Root → TLD (.net) → CDN's Authoritative DNS → IP (A/AAAA record)
+   example.com.  NS  ns1.cloudcdn.net.
+   example.com.  NS  ns2.cloudcdn.net.
    ```
-3. Returns the IP from the CDN’s authoritative server to your browser.
 
-So in **CNAME method**, the resolver essentially performs **two DNS lookups**:
+   * If `ns1.cloudcdn.net` is **in `.com` zone**, `.com` TLD also returns **glue records** with its IP.
+   * If `ns1.cloudcdn.net` is **in `.net` zone** → **no glue**; resolver must do **another lookup**.
 
-* **First** for your domain → gets the **CNAME**.
-* **Second** for the CDN hostname in the CNAME → gets the **IP address**.
 
-That’s why **CNAME introduces one extra DNS lookup** compared to **NS delegation**.
+
+### **Step 3 — If no glue record (extra resolution)**
+
+8. Resolver → queries root for `.net` (to resolve `ns1.cloudcdn.net`).
+9. Root replies: “Ask `.net` TLD servers.”
+10. Resolver → queries `.net` TLD: “What’s the NS for `cloudcdn.net`?”
+11. `.net` TLD replies with NS for `cloudcdn.net` + glue records (because `ns1.cloudcdn.net` is in `.net`).
+12. Resolver queries `cloudcdn.net`’s authoritative server for `A` record of `ns1.cloudcdn.net` → gets IP.
+
+
+
+### **Step 4 — Query CDN authoritative server**
+
+13. Resolver → queries `ns1.cloudcdn.net` for `www.example.com`.
+14. CDN authoritative server replies:
+
+```
+www.example.com.  60  IN  A  203.0.113.45
+```
+
+* This IP is usually **Anycasted** and points to the nearest CDN edge node.
+
+
+
+### **Step 5 — Connect to CDN**
+
+15. Resolver caches answer → sends IP to OS.
+16. Browser connects to **nearest CDN edge server** at `203.0.113.45`.
+
+
+
+## **Case 2 — CNAME to CDN**
+
+Here, `example.com` is **not delegated** to CDN.
+Instead, the main authoritative server has a **CNAME** pointing to CDN’s domain.
+
+
+
+### **Step 0 — User request**
+
+1. Browser requests `www.example.com`.
+2. Browser cache → OS cache → Recursive resolver.
+
+
+
+### **Step 1 — Resolver asks root**
+
+3. Resolver → queries root for `example.com`.
+4. Root replies: “Ask `.com` TLD servers.”
+
+
+
+### **Step 2 — Resolver asks `.com` TLD**
+
+5. Resolver → queries `.com` TLD: “What’s the NS for `example.com`?”
+6. `.com` TLD replies:
+
+   ```
+   example.com.  NS  ns1.myoriginaldns.com.
+   ```
+
+   * May also return glue IP if inside `.com`.
+
+
+
+### **Step 3 — Query original authoritative server**
+
+7. Resolver queries `ns1.myoriginaldns.com` for `www.example.com`.
+8. Response:
+
+   ```
+   www.example.com.  CNAME  cdn.cloudcdn.net.
+   ```
+
+   → Means: “Go resolve `cdn.cloudcdn.net`.”
+
+
+
+### **Step 4 — Resolve CDN domain**
+
+9. Resolver → queries root for `.net`.
+10. Root replies: “Ask `.net` TLD servers.”
+11. Resolver → queries `.net` TLD for `cloudcdn.net`.
+12. `.net` TLD replies:
+
+```
+cloudcdn.net.  NS  ns1.cloudcdn.net.
+```
+
+(+ glue IP if available)
+
+
+
+### **Step 5 — Query CDN authoritative server**
+
+13. Resolver queries `ns1.cloudcdn.net` for `cdn.cloudcdn.net`.
+14. CDN authoritative replies:
+
+```
+cdn.cloudcdn.net.  60  IN  A  203.0.113.45
+```
+
+(Anycasted IP)
+
+
+
+### **Step 6 — Connect to CDN**
+
+15. Resolver caches answer → sends IP to OS.
+16. Browser connects to **nearest CDN edge**.
+
+
+
+## **Key Difference**
+
+| Method    | Who sends resolver to CDN?                             | Extra lookups needed?  |
+| --------- | ------------------------------------------------------ | ---------------------- |
+| **NS**    | **TLD server** delegates to CDN NS                     | Sometimes (if no glue) |
+| **CNAME** | **Original authoritative server** points to CDN domain | Always                 |
+
 
 
