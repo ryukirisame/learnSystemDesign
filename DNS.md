@@ -1,15 +1,4 @@
 
-3. Types of DNS servers, Example of each type of DNS server, who manages each DNS servers
-
-7. Caching, TTL
-
-
-
-
-
-
-
-
 # What is DNS?
 Every single computer (or server) on the internet is identified by their IP address (e.g., `142.250.182.110` for Google). When one computer wants to communicate with another, it uses the destination’s IP address to connect to it. 
 
