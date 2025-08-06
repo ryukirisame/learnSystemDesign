@@ -1,17 +1,13 @@
-1. What is DNS?
-2. Namespace, Tree Hierarchy, TLD, SLD, Subdomain, Zone
+
 3. Types of DNS servers, Example of each type of DNS server, who manages each DNS servers
-4. Types of DNS records
-5. DNS resolution process
-6. Delegation
+
 7. Caching, TTL
-8. GeoDNS
-9. Types of DNS queries: recursive, iterative and non-recursive
-10. DNS Security Issues
-11. DNS query using dig command, ipconfig /displaydns
-12. How DNS works/integrates with CDN, load balancing, fail over, geo-load balancing
-13. Difference between www and mail. is www default?
-14. Anycast IPs
+
+
+
+
+
+
 
 
 # What is DNS?
@@ -198,7 +194,7 @@ Most users rely on the recursive resolver provided by their Internet Service Pro
 - An Authoritative Name Server is the DNS server that holds the actual DNS records (IP and other DNS records) for a domain.
 - It is the final source of truth in the DNS lookup process.
 - When a recursive resolver queries an authoritative server for a domain, the authoritative server returns the answer directly — typically the A record (IPv4), AAAA record (IPv6), or CNAME record for the requested host.
-- Managed by the domain owner or their DNS hosting provider(e.g., Cloudflare, AWS Route 53, GoDaddy).
+- Managed by the domain owner (companies, organizations, or individuals) or their DNS hosting provider(e.g., Cloudflare, AWS Route 53, GoDaddy).
 - Query to authoritative name server: “What is the IP for `www.example.com`?”
    - Authoritative server reply: “The IP for www.example.com is `93.184.216.34`.”
 
