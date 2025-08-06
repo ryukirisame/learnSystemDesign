@@ -122,6 +122,37 @@ Every level in this structure is separated by a dot (`.`), and the entire sequen
 - Uniqueness – No two domains at the same level can have the same name.
 
 
+# `www` vs Other Subdomains in DNS**
+* The subdomain part is mainly for service separation under the same main domain.
+* `www` is just a **subdomain** of the main domain (`example.com`), like `mail.example.com`, `api.example.com`, etc.
+* DNS treats all subdomains **equally** — no special meaning for `www`.
+
+| Subdomain                                   | Service it provides    |
+| ------------------------------------------- | ---------------------- |
+| **[www.google.com](http://www.google.com)** | Standard Google search |
+| **mail.google.com**                         | Gmail (email service)  |
+| **photos.google.com**                       | Google Photos          |
+| **maps.google.com**                         | Google Maps            |
+| **drive.google.com**                        | Google Drive           |
+
+
+* **Why `www` Became Common:**
+  * Originates from “World Wide Web” (early internet naming convention).
+  * Historically used to distinguish the website from other services like `mail`, `ftp`, etc.
+
+* **Modern Usage:**
+  * Many sites now serve content directly from the **root/apex domain** (e.g., `chatgpt.com`) without `www`.
+  * Some still use `www` for:
+    * Technical separation of services
+    * DNS CNAME flexibility (CNAME not allowed at apex)
+    * Historical SEO/link consistency
+    * Cookie scoping between subdomains
+
+* **Key Point:**
+  * `www` is **not required** in DNS.
+  * It’s purely a **convention** and **branding choice** — can be removed entirely.
+
+
 # Types of DNS Servers
 
 1. Recursive Resolver
