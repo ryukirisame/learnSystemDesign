@@ -641,14 +641,12 @@ You type `www.example.com` into your browser.
 When you set up your CDN (Cloudflare, Akamai, Fastly, etc.), you configure your domain’s authoritative DNS to point traffic to the CDN.
 
 This usually happens in two ways:
-1. CNAME method (most common for partial CDN)
+1. CNAME record method (most common for partial CDN)
    - `www.example.com → CNAME → www.example.com.cdnprovider.net`
    - This means: “If you want www.example.com, actually go ask CDN’s DNS system.”
-2. Nameserver delegation method (full CDN)
+2. Nameserver (NS record) delegation method (full CDN)
    - You change your domain’s NS records to point to CDN’s authoritative name servers directly.
    - This means your CDN becomes your authoritative DNS for that domain.
-
-
 
 ## **Step‑by‑Step: CDN Domain Resolution**
 
