@@ -355,8 +355,7 @@ For a CDN:
 * **High-performance sites** often prefer **ETag** for accuracy.
 * **Static file servers** sometimes rely only on `Last-Modified` since the timestamp doesn’t change unless you redeploy.
 
-
-
-
+# Extra Resources
+- Cloudflare docs: https://developers.cloudflare.com/cache/concepts/revalidation/
 
 
