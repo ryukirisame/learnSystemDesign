@@ -105,7 +105,6 @@ Pull CDNs don’t blindly re-download files when the cache expires; instead, the
 2. The **edge cache** sees the TTL has expired — file is *stale*.
 3. Instead of instantly downloading the whole file again, the CDN sends a **conditional request** to the origin server.
 4. The origin server then checks:
-
    * If the file has **not changed** → sends a **`304 Not Modified`** response (no content body).
    * If the file **has changed** → sends a **`200 OK`** with the new file content.
 5. The CDN updates or refreshes its cache accordingly.
@@ -113,7 +112,7 @@ Pull CDNs don’t blindly re-download files when the cache expires; instead, the
 
 ##  **How the CDN Knows if the File Changed**
 
-This depends on few **HTTP headers**:
+It's through some **HTTP headers**:
 
 ### 1. **ETag** - Response header
 * Sent by origin to CDN included in the response the first time the content is fetched.
