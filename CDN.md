@@ -62,3 +62,226 @@ Push CDNs shine where files are large, infrequently updated, and you want maximu
 * **Pull CDN** = “Lazy Loading” — fetch when needed. Great for *changing or unpredictable* content.
 * **Push CDN** = “Preloading” — upload everything in advance. Great for *big, rarely changing* files.
 
+# Additional Notes
+
+## TTL (Time to Live) in Pull CDNs
+
+TTL tells the CDN how long it should keep a cached file before considering it “expired.”
+
+### How it works in Pull CDNs:
+- When TTL expires, the CDN will discard the cached file (or mark it stale).
+- On the next user request, the CDN must fetch it again from the origin server.
+
+### Why it's important:
+- If TTL is too short → unnecessary re-fetches → more origin traffic.
+- If TTL is too long → users might see outdated content.
+
+
+## Versioning in Push CDNs
+- The challenge: In Push CDNs, once you upload a file, it’s stored across all edge servers. If you update it, you have to either:
+  - Wait for caches to expire (slow), or
+  - Force a cache purge (can be expensive and slow to propagate).
+
+- The solution: Versioning your file names.
+  - Example: Instead of logo.png always, use:
+    - v1.0/logo.png
+    - v1.1/logo.png
+  - Each version is treated as a completely new file by the CDN.
+
+- Why it’s useful:
+  - Old versions stay available if needed.
+  - No risk of users seeing an old cached version.
+  - No need for global cache invalidation.
+
+
+
+
+# How to optimize re-fetch in pull CDNs
+Pull CDNs don’t blindly re-download files when the cache expires; instead, they often validate with the origin server to check if the file has changed.
+
+##  **What Happens When TTL Expires in a Pull CDN**
+
+1. **User requests** a file.
+2. The **edge cache** sees the TTL has expired — file is *stale*.
+3. Instead of instantly downloading the whole file again, the CDN sends a **conditional request** to the origin server.
+4. The origin server then checks:
+
+   * If the file has **not changed** → sends a **`304 Not Modified`** response (no content body).
+   * If the file **has changed** → sends a **`200 OK`** with the new file content.
+5. The CDN updates or refreshes its cache accordingly.
+
+
+##  **How the CDN Knows if the File Changed**
+
+This depends on few **HTTP headers**:
+
+### 1. **ETag** - Response header
+* Sent by origin to CDN included in the response the first time the content is fetched.
+* Think of it as a file fingerprint (hash or unique ID).
+* CDN stores this value with the cached file.
+* https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag
+
+### 2. If-None-Match - Request header
+- Corresponding request header of ETag sent by CDN to origin.
+- Makes a request conditional.
+- https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match
+
+### 3. **Last-Modified** - Response header
+* Timestamp of when the file was last changed.
+* CDN stores this date/time.
+* https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Last-Modified
+
+### 4. If-Modified-Since - Request header
+- Corresponding request header of Last-Modified.
+- Sent by CDN to origin.
+- https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Modified-Since
+
+
+# Full example flow:
+
+We have:
+
+* **Origin server**: `origin.example.com`
+* **Pull CDN**: `cdn.example.com`
+* **Asset**: `/images/logo.png`
+* **TTL in CDN**: 24 hours
+
+## **Step 1 — First Request (Cache Miss)**
+
+A user requests `https://cdn.example.com/images/logo.png`.
+
+**CDN behavior**:
+
+* Checks its edge cache → **miss** (file not stored or expired).
+* Sends request to **origin server**.
+
+### **Request from CDN to Origin**
+
+```http
+GET /images/logo.png HTTP/1.1
+Host: origin.example.com
+User-Agent: CDN-Edge-Server
+```
+
+### **Response from Origin**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: image/png
+Content-Length: 53217
+Cache-Control: max-age=86400
+ETag: "abc123xyz"
+Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+**Explanation of headers:**
+
+* **`Cache-Control: max-age=86400`** → tells CDN to cache this file for **24 hours**.
+* **`ETag`** → unique file fingerprint (string/hash). Changes if file changes.
+* **`Last-Modified`** → timestamp when file last changed.
+* **`Content-Length`** → file size in bytes.
+
+**CDN action**: Stores:
+
+* File content
+* `ETag`
+* `Last-Modified`
+* Expiry time = now + 24h
+
+
+
+## **Step 2 — Subsequent Requests Within TTL**
+
+If a user requests again **before TTL expires**:
+
+* CDN serves directly from edge cache.
+* **No request** is sent to origin.
+* Response is instant.
+
+
+
+## **Step 3 — TTL Expires (Cache Stale)**
+
+After 24h, a new request comes in:
+
+* File is **stale** (TTL expired).
+* CDN needs to **revalidate** before serving.
+
+
+## **Step 4 — Conditional GET to Origin**
+
+Instead of re-downloading the file, CDN sends a **conditional request** using stored `ETag` and/or `Last-Modified`.
+
+### **Conditional Request**
+
+```http
+GET /images/logo.png HTTP/1.1
+Host: origin.example.com
+User-Agent: CDN-Edge-Server
+If-None-Match: "abc123xyz"
+If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+**Explanation:**
+
+* **`If-None-Match`** → asks origin: “Only send file if its ETag is different from `"abc123xyz"`.”
+* **`If-Modified-Since`** → asks origin: “Only send file if it was modified after `Wed, 21 Oct 2015 07:28:00 GMT`.”
+
+
+## **Step 5 — Origin Determines File Status**
+
+Two possibilities:
+
+### **Case A — File Unchanged**
+
+Origin checks:
+
+* Current ETag = `"abc123xyz"` (same as before)
+* Last Modified = same date
+
+Returns:
+
+```http
+HTTP/1.1 304 Not Modified
+Date: Thu, 22 Oct 2015 07:28:00 GMT
+Cache-Control: max-age=86400
+ETag: "abc123xyz"
+Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+**Notes:**
+
+* **`304 Not Modified`** → No body sent, just headers.
+* **`ETag`** and **`Last-Modified`** confirm the file is unchanged.
+* File is **NOT re-downloaded**, CDN simply extends the cache TTL.
+
+### **Case B — File Changed**
+
+If ETag or Last-Modified has changed, origin sends:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: image/png
+Content-Length: 53280
+Cache-Control: max-age=86400
+ETag: "def456uvw"
+Last-Modified: Fri, 23 Oct 2015 10:12:00 GMT
+```
+
+**Notes:**
+
+* `200 OK` → full file sent again.
+* `ETag` and `Last-Modified` are updated in CDN cache.
+
+
+## **Benefits of This Approach**
+
+* **Bandwidth saving**: `304 Not Modified` is tiny (\~few hundred bytes) compared to file download.
+* **Speed**: Faster responses for unchanged files.
+* **Origin load reduction**: Less CPU, disk, and network usage.
+
+
+
+
+
+
