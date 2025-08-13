@@ -280,6 +280,82 @@ Last-Modified: Fri, 23 Oct 2015 10:12:00 GMT
 * **Origin load reduction**: Less CPU, disk, and network usage.
 
 
+# ETag vs Last-Modified
+
+We don't need to use both of them to check whether the content has been updated on origin. We could use just one of them. But there are trade-offs.
+
+### **1. Last-Modified / If-Modified-Since**
+
+* **What it is**: A timestamp indicating when the resource last changed.
+* **Workflow**:
+
+  1. **Origin Server Response** (initial fetch)
+
+     ```
+     Last-Modified: Wed, 07 Aug 2024 10:23:45 GMT
+     ```
+  2. **Next request** (by CDN/browser when cache is stale):
+
+     ```
+     If-Modified-Since: Wed, 07 Aug 2024 10:23:45 GMT
+     ```
+  3. If content is unchanged, server responds with:
+
+     ```
+     HTTP/1.1 304 Not Modified
+     ```
+* **Pros**:
+  * Simple and human-readable.
+  * Very lightweight.
+* **Cons**:
+  * Only accurate to **1-second resolution**. Notice the time-stamp, it's only till seconds, not milli-seconds. So, if a change happens quickly within milli-seconds, changes may be missed.
+  * If files change more than once in a second, changes may be missed.
+  * Can give false positives if server clocks differ.
+
+### **2. ETag / If-None-Match**
+
+* **What it is**: A unique identifier (hash, checksum, or version ID) for the resource content.
+* **Workflow**:
+
+  1. **Server Response** (initial fetch):
+
+     ```
+     ETag: "abc123xyz"
+     ```
+  2. **Next request**:
+
+     ```
+     If-None-Match: "abc123xyz"
+     ```
+  3. If ETag matches, server responds:
+
+     ```
+     HTTP/1.1 304 Not Modified
+     ```
+* **Pros**:
+
+  * More precise — detects changes even within the same second.
+  * Works even if clocks are out of sync.
+  * Can be based on content hash (guarantees accuracy).
+* **Cons**:
+
+  * Slightly more overhead (server must compute hash or generate unique version IDs).
+  * Poorly implemented ETags (e.g., including machine-specific data in them) can break caching between servers.
+
+### **So why use both sometimes?**
+
+* **Fallback & safety**: Some servers send both to maximize compatibility. (In cases where ETag is not supported, Last-Modified would work and vice versa)
+* **Different strengths**:
+
+  * `Last-Modified` → Fast and simple timestamp check.
+  * `ETag` → Stronger guarantee of content match.
+
+For a CDN:
+
+* **High-performance sites** often prefer **ETag** for accuracy.
+* **Static file servers** sometimes rely only on `Last-Modified` since the timestamp doesn’t change unless you redeploy.
+
+
 
 
 
