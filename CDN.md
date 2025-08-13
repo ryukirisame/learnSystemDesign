@@ -355,6 +355,22 @@ For a CDN:
 * **High-performance sites** often prefer **ETag** for accuracy.
 * **Static file servers** sometimes rely only on `Last-Modified` since the timestamp doesn’t change unless you redeploy.
 
+# Conditional Request
+A **conditional request** in HTTP is when the client tells the server:
+
+> "Send me the resource **only if** it meets a certain condition."
+
+This condition is usually about whether the resource has changed since the last time the client saw it — so the server can avoid sending the full content if nothing changed.
+
+## 🔹 How it works
+
+A conditional request uses special HTTP request headers that set the condition.
+If the condition is **true**, the server sends the full resource (`200 OK`).
+If the condition is **false**, the server sends **only a small response** (usually `304 Not Modified`) with no body.
+
+
+
+
 # Extra Resources
 - Cloudflare docs: https://developers.cloudflare.com/cache/concepts/revalidation/
 
