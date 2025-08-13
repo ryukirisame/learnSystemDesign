@@ -24,7 +24,7 @@ Pros:
 - Dynamic content support: Easier to work with sites where content changes regularly
 
 Cons:
-- Increased traffic between origin and CDN. Imagine the TTL for a content expires (or TTL is very short) and it gets re-fetched, even if it has not changed. So, for the same piece of data, its being fetched again after a while, which eventually increases traffic.
+- Increased traffic between origin and CDN. Imagine the TTL for a content expires (or TTL is very short) and it gets re-fetched, even if it has not changed. So, for the same piece of data, its being fetched again after a while, which eventually increases traffic. (NOTE: This can be optimized, we'll see later)
 - A user might have to wait a while to get the latest data, as the data will be re-fetched only when the TTL expires.
 - If content is not cached and origin is down, the request will fail.
 
