@@ -1,4 +1,5 @@
 
+https://blog.algomaster.io/p/content-delivery-networks
 
 # Push CDNs
 The origin server actively uploads new content to CDN in advance.
