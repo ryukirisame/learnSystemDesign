@@ -110,7 +110,34 @@ No. While both hide your IP, a VPN encrypts all your internet traffic, making it
   * Protects against DDoS by rate-limiting.
   * Centralized TLS certificates → backend stays simple.    // QUESTION
 
+# Does my router work as a proxy?
+No. Router is a networking device, not a proxy.   // QUESTION - WHY?
 
+# Zscaler - A Cloud Proxy
+
+If your company uses **Zscaler Internet Access (ZIA)** with the **Zscaler Client Connector** on your laptop, your web traffic is being sent to Zscaler’s cloud where it’s inspected and forwarded to the internet. That’s functionally a **forward proxy / secure web gateway**. Here’s how it works, step by step.
+
+## How Zscaler proxies your traffic with the Zscaler Client Connector (most common for laptops)
+
+1. **Zscaler Client Connector starts & you sign in**
+   The Zscaler Client Connector (formerly “Zscaler App”) runs on your device and authenticates you (SSO, etc.). It decides **what traffic to capture** based on an admin “forwarding profile” (e.g., all web traffic, or specific apps). 
+
+2. **Encrypted tunnel to Zscaler**
+   The connectory then establishes a **Z-Tunnel 2.0** (DTLS/TLS) to the closest **Zscaler Public Service Edge** (formerly ZEN). This is an authenticated, encrypted path that carries your traffic to Zscaler’s cloud. 
+
+3. **Forwarding decision & DNS**
+   For traffic that’s meant to go via Zscaler, the connector sends it into the tunnel. **Zscaler performs DNS resolution for proxied traffic** (bypassed traffic resolves locally).
+
+4. **Policy, filtering, and (optionally) SSL inspection**
+   At the Service Edge, Zscaler enforces your company’s policies (URL filtering, malware checks, DLP, CASB, etc.).
+
+   * If **SSL inspection** is enabled, Zscaler **terminates TLS**, inspects the plaintext, then re-encrypts to the destination site using a trusted corporate/Zscaler cert you have installed.
+
+5. **Egress to the internet & return**
+   Zscaler (acting as a cloud proxy) connects to the destination site from its own egress IPs, gets the response, applies policy again if needed, then **sends it back through your tunnel** to your device. (Zscaler’s Service Edges—fka **ZENs**—are the inline proxy nodes doing this.) 
+
+6. **Logs & reports**
+   Your organization can view logs/reports centrally since your traffic traverses Zscaler’s Service Edges (that’s a big part of the value prop). (General ZIA behavior; see ZIA traffic-forwarding reference.)
 
 
 
