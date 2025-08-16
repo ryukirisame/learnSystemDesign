@@ -185,6 +185,7 @@ https://youtube.com/shorts/PK3WsV_Cq54?si=EPre8xJlWInQOnzo
 
 * **What it does:** Encrypts all traffic and forwards it.
 * Works at the network layer (IP layer).
+* They also perform DNS resolution, instead of ISP.
 * **How it works (step-by-step):**
 
   1. You connect to a VPN client on your laptop/phone.
