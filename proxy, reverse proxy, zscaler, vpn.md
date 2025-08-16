@@ -54,7 +54,7 @@ A **reverse proxy** is used by **servers** to manage requests coming from client
 ### Common Uses:
 
 1. **Load Balancing** → Distributes traffic across multiple backend servers (Nginx, HAProxy).
-2. **SSL Termination** → Reverse proxy handles HTTPS encryption, backend servers can stay HTTP.                    // QUESTION
+2. **SSL Termination** → means the reverse proxy handles HTTPS encryption/decryption, so backend servers only deal with plain HTTP.
 3. **Caching** → Stores responses (e.g., static assets) to reduce load.
 4. **Security / DDoS protection** → Hides backend IPs, filters traffic.
 5. **Compression / Transformation** → Gzip responses, image optimization, etc.                                     // QUESTION
