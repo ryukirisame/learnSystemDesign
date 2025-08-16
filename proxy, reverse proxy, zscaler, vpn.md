@@ -19,7 +19,7 @@ Client ---> Proxy ---> Server
 ```
 
 * The **client** is configured to use the proxy.
-* When the client requests data, it goes through the proxy.
+* When the client requests data, it goes through the proxy. (A forward proxy creates a new request to the actual site, using its own IP)
 * The proxy fetches the data from the destination server.
 * The proxy returns the response back to the client.
 
