@@ -140,8 +140,74 @@ If your company uses **Zscaler Internet Access (ZIA)** with the **Zscaler Client
    Your organization can view logs/reports centrally since your traffic traverses Zscaler’s Service Edges (that’s a big part of the value prop). (General ZIA behavior; see ZIA traffic-forwarding reference.)
 
 
+## But it’s more than a “plain” proxy
+Zscaler extends the forward proxy idea into a Secure Web Gateway:
+
+- Runs in the cloud (multi-tenant).
+- Always-on policy enforcement (filtering, DLP, malware scanning).
+- SSL interception (optional, based on company policy).
+- Logs/analytics centralized for your IT/security team.
+- Often integrated with identity (so policies apply per user, not just per device).
+So while the core is a forward proxy, it’s packaged as a **security service**.
 
 
+# What is a tunnel?
+
+- A tunnel is a secure, virtual pathway created between two points (your laptop ↔ Zscaler Edge).
+- It encapsulates your traffic inside another protocol.
+- It’s encrypted (and authenticated)  - so outsiders can’t inspect it.
+- To your apps, it just feels like normal internet access — but in reality, all traffic is being routed through this hidden path.
+
+
+
+#  Proxy vs VPN vs Zscaler
+
+## 1. **Proxy**
+
+* **What it does:** Forwards traffic on behalf of the client.
+* **How it works (step-by-step):**
+
+  1. You configure your browser/app to use a proxy.
+  2. You request `youtube.com`.
+  3. Request → Proxy server → YouTube.
+  4. YouTube only sees the proxy server’s IP, not yours.
+* **Key points:**
+
+  * No encryption (traffic is visible to attackers/ISP).
+  * Works only for the app configured.
+  * Example: Using a U.S. proxy to watch U.S.-only Netflix shows.
+
+## 2. **VPN**
+
+* **What it does:** Encrypts all traffic and forwards it.
+* **How it works (step-by-step):**
+
+  1. You connect to a VPN client on your laptop/phone.
+  2. A **tunnel** is created between your device and the VPN server.
+  3. All traffic from all apps is **captured**, then encrypted and then finally sent to VPN server. This makes the traffic unreadable to everyone (router, ISP, attackers) between the client and the VPN server.
+  4. VPN server decrypts and forwards it to the internet.
+  5. Target website sees VPN server’s IP (not yours).
+
+* **Key points:**
+  * Encrypts data (protects from ISP/attackers).
+  * Works for the entire device, not just one app.
+  * Example: Using a VPN in a café to prevent Wi-Fi snooping.
+
+## 3. **Zscaler**
+
+* **What it does:** Like a VPN + Proxy + Security inspection.
+* **How it works (step-by-step):**
+
+  1. Employee installs Zscaler Client Connector.
+  2. A secure tunnel is created from device → nearest Zscaler edge server.
+  3. Traffic goes through **Zscaler cloud**.
+  4. Zscaler inspects the traffic (malware check, data loss prevention, etc.).
+  5. After inspection, forwards request to the target website/app.
+* **Key points:**
+
+  * Hides employee’s real IP (target sees Zscaler IP).
+  * Adds **security features** missing in normal VPNs.
+  * Example: Employee in India connects to Zscaler → Zscaler checks for threats → then forwards to company apps or internet safely.
 
 
 
