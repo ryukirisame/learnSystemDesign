@@ -78,8 +78,8 @@ A **reverse proxy** is used by **servers** to manage requests coming from client
   * Corporate internet proxies - Zscaler
   * Tor network nodes.
 
-### Is a VPN the same as a Proxy?          // QUESTION
-No. While both hide your IP, a VPN encrypts all your internet traffic, making it more secure. A proxy only forwards specific requests without necessarily encrypting them.
+### Is a VPN the same as a Proxy?          
+No. While both hide your IP, a VPN encrypts **all** your internet traffic, making it more secure. A proxy only forwards specific requests without necessarily encrypting them.
 
 ## Reverse Proxy
   * Nginx or Apache as a reverse proxy in front of web servers.
