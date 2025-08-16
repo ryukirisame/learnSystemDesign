@@ -179,6 +179,8 @@ So while the core is a forward proxy, it’s packaged as a **security service**.
 
 ## 2. **VPN**
 
+https://youtube.com/shorts/PK3WsV_Cq54?si=EPre8xJlWInQOnzo
+
 * **What it does:** Encrypts all traffic and forwards it.
 * **How it works (step-by-step):**
 
