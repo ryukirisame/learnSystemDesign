@@ -165,6 +165,8 @@ So while the core is a forward proxy, it’s packaged as a **security service**.
 ## 1. **Proxy**
 
 * **What it does:** Forwards traffic on behalf of the client.
+* Works at application layer (HTTP etc).
+
 * **How it works (step-by-step):**
 
   1. You configure your browser/app to use a proxy.
@@ -182,6 +184,7 @@ So while the core is a forward proxy, it’s packaged as a **security service**.
 https://youtube.com/shorts/PK3WsV_Cq54?si=EPre8xJlWInQOnzo
 
 * **What it does:** Encrypts all traffic and forwards it.
+* Works at the network layer (IP layer).
 * **How it works (step-by-step):**
 
   1. You connect to a VPN client on your laptop/phone.
