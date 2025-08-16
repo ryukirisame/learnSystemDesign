@@ -57,7 +57,7 @@ A **reverse proxy** is used by **servers** to manage requests coming from client
 2. **SSL Termination** → means the reverse proxy handles HTTPS encryption/decryption, so backend servers only deal with plain HTTP.
 3. **Caching** → Stores responses (e.g., static assets) to reduce load.
 4. **Security / DDoS protection** → Hides backend IPs, filters traffic.
-5. **Compression / Transformation** → Gzip responses, image optimization, etc.                                     // QUESTION
+5. **Compression / Transformation** → reverse proxy can modify or optimize responses before sending them to the client.  
 6. **Routing / API Gateway** → Sends requests to different services based on paths (`/api`, `/auth`, etc.).
 
 
