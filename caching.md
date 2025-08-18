@@ -73,6 +73,7 @@ But in the case of Cache, its a fast memory and all data is stored as key-value 
    - Examples - Java: Caffeine, HashMap
    - Fastest possible (no network calls, just memory lookup)
    - Risk of out-of-memory if cache grows too large.
+   - Cache is private, per app.
 2. Distributed In-Memory Cache
    - A separate service (cluster of cache servers) accessible over the network.
    - Shared by multiple application servers.
@@ -84,6 +85,39 @@ But in the case of Cache, its a fast memory and all data is stored as key-value 
    - Scales horizontally (add more nodes, shard keys).
    - Large capacity (since memory is spread across servers).
    - Slightly slower than local cache (network call involved). 
+
+## Distributed Cache
+
+- A distributed cache is a caching system that runs on multiple servers (a cluster) and stores data in RAM across those servers.
+- Applications connect to this cache cluster over the network.
+- All app instances share the same cache → ensures consistency across the system.
+- Examples: Redis, Memcached, Hazelcast, Apache Ignite.
+- Think of it as a shared memory space for the whole system, unlike local cache which is private per app instance.
+
+### Architectures of Distributed Cache
+
+#### Centralized Cache (Single Node)
+
+- One cache server, all app servers connect to it.
+- Simple but a single point of failure (SPOF).
+- Used in small deployments.
+
+#### Replicated Cache (Full Copy per Node)
+- Every cache node has a full copy of the cache data.
+- High availability but memory overhead (data duplicated everywhere).
+- Works well for read-heavy workloads.
+
+#### Partitioned / Sharded Cache
+
+- Data is split across multiple nodes (each node stores only a portion).
+- Scaling horizontally is easy → just add more nodes.
+- Requires consistent hashing or similar algorithm to decide where data lives.
+- Common in Redis Cluster, Memcached.
+
+#### Hybrid (Partitioned + Replicated)
+
+- Data is _sharded_ across nodes, but each shard has a replica for fault tolerance.
+- Balances scalability and high availability.
 
 
 
