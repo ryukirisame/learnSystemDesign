@@ -42,3 +42,13 @@ Von Neumann Bottleneck: Caching helps overcome this bottleneck by serving data f
 6. Enhanced User Experience: Faster response times lead to a better user experience, particularly for web and mobile applications.
       
 
+# Why caching is scalable but database is not?
+
+Because memory lookups are O(1) operations, while databases involve parsing, planning, locking, I/O, etc.
+
+
+In case of DBs, there are many steps involved from receiving a query to returning results: parsing, planning, executing, managing transactions, and often performing disk I/O, which is slow. As data grows in the database or number of concurrent requests increase, these become heavier, leading to slower responses. 
+
+But in the case of Cache, its a fast memory and all data is stored as key-value store. So, no matter how big the cache storage is, the lookup will always be O(1). This makes retrieval extremely fast and predictable, even under high load.
+
+
