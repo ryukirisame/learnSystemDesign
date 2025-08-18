@@ -25,7 +25,6 @@ Von Neumann Bottleneck: Caching helps overcome this bottleneck by serving data f
 - Its goal is to improve performance by reducing latency and expensive operations (like database queries, network calls, heavy calculations, etc).
 
 # Why use caching?
-
 1. Improved Performance: Retrieving data from cache is always faster than retrieving data from slower sources like disk, database, remote API. 
     - Imagine fetching user profile data:
       - From cache (Redis in-memory): ~0.2ms
@@ -47,5 +46,50 @@ Von Neumann Bottleneck: Caching helps overcome this bottleneck by serving data f
 In case of DBs, there are many steps involved between receiving a query to returning results: parsing, planning, executing, managing transactions, and often performing disk I/O, which is slow. As data grows in the database or number of concurrent requests increase, these become heavier, leading to slower responses. 
 
 But in the case of Cache, its a fast memory and all data is stored as key-value store. So, no matter how big the cache storage is, the lookup will always be O(1). This makes retrieval extremely fast and predictable, even under high load.
+
+
+# Types of caching (based on location)
+
+1. In-Memory Cache
+2. Distributed Cache
+3. Client-Side Cache
+4. Database Cache
+5. CDN
+6. Reverse Proxy Cache
+
+
+
+## 1. In-Memory Cache
+
+- An in-memory cache stores data directly in RAM (main memory) instead of on disk.
+- Typically used for hot data (frequently accessed, high-performance needs).
+- It is the fastest type of cache.
+- Volatility: Data is lost if the process or machine restarts (unless backed up or persisted separately).
+- Structure: Usually key–value store (hash map, dictionary, etc.).
+
+### Types of In-Memory Cache
+1. Local (In-Process) Cache
+   - Data is stored inside the same memory space as the application process.
+   - Examples - Java: Caffeine, HashMap
+   - Fastest possible (no network calls, just memory lookup)
+   - Risk of out-of-memory if cache grows too large.
+2. Distributed In-Memory Cache
+   - A separate service (cluster of cache servers) accessible over the network.
+   - Shared by multiple application servers.
+   - Examples:
+        - Redis (supports persistence, advanced data structures).
+        - Memcached (lightweight, simple key–value).
+        - Hazelcast / Ehcache (for Java applications).
+     
+   - Scales horizontally (add more nodes, shard keys).
+   - Large capacity (since memory is spread across servers).
+   - Slightly slower than local cache (network call involved). 
+
+
+
+
+
+
+
 
 
