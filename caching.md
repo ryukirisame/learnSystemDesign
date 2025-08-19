@@ -86,12 +86,12 @@ But in the case of Cache, its a fast memory and all data is stored as key-value 
    - Large capacity (since memory is spread across servers).
    - Slightly slower than local cache (network call involved). 
 
-## Distributed Cache
+## 2. Distributed Cache
 
 - A distributed cache is a caching system that runs on multiple servers (a cluster) and stores data in RAM across those servers.
 - Applications connect to this cache cluster over the network.
 - All app instances share the same cache → ensures consistency across the system.
-- Examples: Redis, Memcached, Hazelcast, Apache Ignite.
+- Examples: Redis, Memcached, Hazelcast, Apache Ignite, Amazon ElastiCache
 - Think of it as a shared memory space for the whole system, unlike local cache which is private per app instance.
 
 ### Architectures of Distributed Cache
@@ -119,6 +119,60 @@ But in the case of Cache, its a fast memory and all data is stored as key-value 
 - Data is _sharded_ across nodes, but each shard has a replica for fault tolerance.
 - Balances scalability and high availability.
 
+## 3. Client-Side Cache
+
+
+
+
+
+
+# Cache Stampede / Dogpile Effect / Thundering Herd Problem
+
+A cache stampede happens when a popular cached item expires (or is missing), and then many concurrent requests hit the backend (DB, API, etc.) at the same time to recompute or reload that value.
+
+- Instead of a single request repopulating the cache, hundreds or thousands may hit the database simultaneously.
+- This negates the purpose of caching and can even cause the backend to crash under sudden load.
+
+- We can have two scenarios:
+  1. Multiple simultaneous requests hit the same cached key.
+  2. Multiple simultaneous requests hit different cached key.
+
+## Example Scenarios
+1. Manual bulk warming / preloading
+- Example: At app startup, you preload the top 1M product pages into the cache with a TTL=5 min.
+- Since they’re all written at once, they will all expire at the same moment → stampede risk.
+
+2. Hot keys with synchronized access
+
+
+## Why Does It Happen?
+
+- Fixed TTL Expiry → When many clients request the same data right after it expires.
+- Cold Cache / Cache Miss → First access after startup or eviction triggers many requests.
+- Thundering Herd Problem → Multiple workers/threads waking up to recompute at the same time.
+
+## Problem it causes
+- Sudden spike in database load.
+- Increased latency for users.
+- Possible downtime if DB is overwhelmed.
+
+
+## Solutions
+
+1. Cache Locking (Mutex / Locking Mechanism)  (For scenario 1)
+- When a cache miss occurs, only the first process/thread recomputes and repopulates the cache.
+- Other concurrent requests either wait for the process to finish (and serve the newly cached value), or serve stale data.
+
+2. Randomized Expiry (For scenario 2)
+- Problem: If you set a fixed TTL (say 60s) on a popular cache key, all clients may get a cache miss at exactly the same second → everyone hits the DB together → stampede.
+- Working:
+  - Instead of all cache entries expiring at the same fixed time, you add a small random offset to each key’s TTL.
+  - Example:
+    - Normally: All items expire at 60s.
+    - With randomized expiry: Each item expires at 60 ± random(0–10s) → some expire at 55s, some at 63s, some at 68s.
+- Effect: Expirations are spread out over time, hence preventing simultaneous recomputations.
+
+3. Early Revalidation / Soft TTL
 
 
 
