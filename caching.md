@@ -143,6 +143,9 @@ A cache stampede happens when a popular cached item expires (or is missing), and
 - Since they’re all written at once, they will all expire at the same moment → stampede risk.
 
 2. Hot keys with synchronized access
+- Example: A trending product (product:123) gets cached at t=0 with TTL=300s.
+- Millions of users hit it within that window.
+- At t=300s, everyone sees a miss at the same instant.
 
 
 ## Why Does It Happen?
@@ -172,7 +175,7 @@ A cache stampede happens when a popular cached item expires (or is missing), and
     - With randomized expiry: Each item expires at 60 ± random(0–10s) → some expire at 55s, some at 63s, some at 68s.
 - Effect: Expirations are spread out over time, hence preventing simultaneous recomputations.
 
-3. Early Revalidation / Soft TTL
+
 
 
 
