@@ -275,7 +275,8 @@ There are several caching strategies, depending on what a system needs - whether
 
 ---
 
-
+- Write Back doesn't require invalidation of cache entries, as the cache itself is the source of truth during the write process.
+- Write Back caching is ideal for write-heavy scenarios where write operations need to be fast and frequent, but immediate consistency with the database is not critical, such as logging systems and social media feeds.
 
 
 
