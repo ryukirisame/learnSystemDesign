@@ -244,6 +244,8 @@ There are several caching strategies, depending on what a system needs - whether
 
 ## Write Back / Write Behind
 
+<img width="777" height="256" alt="image" src="https://github.com/user-attachments/assets/d6b89afc-a05f-499b-9565-439331e641da" />
+
 - In Write-Back, when the application writes data:
     - It only writes to the cache.
     - The actual database update is deferred (asynchronously written “behind the scenes”).
