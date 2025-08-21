@@ -282,6 +282,7 @@ There are several caching strategies, depending on what a system needs - whether
 
 
 
+<img width="1456" height="860" alt="image" src="https://github.com/user-attachments/assets/10532688-6510-4af4-a13a-3ad86a02c782" />
 
 
 
