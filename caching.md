@@ -199,11 +199,19 @@ There are several caching strategies, depending on what a system needs - whether
 - Cons: for cache misses, there is a potential delay while the cache queries the database and stores the data. This can result in higher latency during initial reads.
 - To prevent the cache from serving stale data, a time-to-live (TTL) can be added to cached entries. TTL automatically expires the data after a specified duration, allowing it to be reloaded from the database when needed.
 - Read Through caching is best suited for read-heavy applications where data is accessed frequently but updated less often, such as content delivery systems (CDNs), social media feeds, or user profiles.
+- Example: Hazelcast
 
+## Cache Aside / Lazy Loading
 
+<img width="692" height="439" alt="image" src="https://github.com/user-attachments/assets/bb4f9a9b-efc4-439e-b9f7-759960793000" />
 
-
-
+- In this strategy, its the responsibility of application itself (not the cache system) for deciding when to read from DB and when to update the cache.
+- Cache sits "aside" the database - the app controls both: cache and DB.
+- The application first checks the cache for data. If the data exists in cache (cache hit), it’s returned to the application.
+- If the data isn't found in cache (cache miss), the application retrieves it from the database (or the primary data store), then loads it into the cache for subsequent requests.
+- To avoid stale data, we can set a time-to-live (TTL) for cached data. Once the TTL expires, the data is automatically removed from the cache.
+- Cache Aside is perfect for systems where the reads are frequent, writes are relatively infrequent. For example, in an e-commerce website, product data (like prices, descriptions, or stock status) is often read much more frequently than it's updated.
+- Example: Memcached, Redis (in most common usage)
 
 
 
