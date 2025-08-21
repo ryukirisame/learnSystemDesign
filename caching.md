@@ -181,6 +181,40 @@ A cache stampede happens when a popular cached item expires (or is missing), and
 - Effect: Expirations are spread out over time, hence preventing simultaneous recomputations.
 
 
+# Caching Strategies
+
+There are several caching strategies, depending on what a system needs - whether the focus is on optimizing for **read-heavy** workloads, **write-heavy** operations, or ensuring **data consistency**.
+
+## Read Through
+
+
+<img width="777" height="246" alt="image" src="https://github.com/user-attachments/assets/789af15a-8d65-4b38-be7d-ba279428aa58" />
+
+- In this strategy, Cache sits "in-between" the app and the DB.
+- The application always asks the cache system for data.
+- If its a cache hit, the cache system returns the data to application immediately. However, if its a cache miss, its the responsibility of the cache system itself to bring data from DB, store it in the cache and then serve it to the application.
+- This approach simplifies application logic because the application does not need to handle the logic for fetching and updating the cache. The cache itself handles both reading from the database and storing the requested data automatically.
+- Since this is a "pull method", so, only that data is stored in the cache that is actually requested by the application. So, it saves cache storage.
+- Pros: For cache hits, Read Through provides low-latency data access.
+- Cons: for cache misses, there is a potential delay while the cache queries the database and stores the data. This can result in higher latency during initial reads.
+- To prevent the cache from serving stale data, a time-to-live (TTL) can be added to cached entries. TTL automatically expires the data after a specified duration, allowing it to be reloaded from the database when needed.
+- Read Through caching is best suited for read-heavy applications where data is accessed frequently but updated less often, such as content delivery systems (CDNs), social media feeds, or user profiles.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
