@@ -242,6 +242,46 @@ There are several caching strategies, depending on what a system needs - whether
 - Write Around caching is best used in write-heavy systems where data is frequently written or updated, but not immediately or frequently read such as logging systems.
 
 
+## Write Back / Write Behind
+
+- In Write-Back, when the application writes data:
+    - It only writes to the cache.
+    - The actual database update is deferred (asynchronously written “behind the scenes”).
+### Example Flow:
+- Step 1: Application writes
+  - User updates their profile.
+  - Instead of writing to the DB:
+      - The update goes into the cache.
+      - Cache marks this entry as dirty (needs DB sync).
+      - Application instantly gets a “success” response.    
+- Step 2: Later DB sync
+    -  Cache has a background thread / write queue.
+    -  After a certain time interval or batch size, it flushes dirty entries to the database.
+- Step 3: Reads
+    - Reads always go to cache.
+    - Since writes are reflected in cache immediately, reads get the latest value (even before DB is updated).
+
+### Pros
+
+1. Low latency on writes (faster than Write-Through and Write-Around), as writes are completed quickly in the cache, and the database updates are delayed or batched.
+2. Good for write-heavy workloads (batching reduces DB load).
+3. High cache hit ratio → since all writes are in cache, reads are almost always served from cache.
+
+### Cons
+
+- There is a risk of data loss if the cache fails before the data has been written to the database.
+- This can be mitigated by using persistent caching solutions like Redis with AOF (Append Only File), which logs every write operation to disk, ensuring data durability even if the cache crashes.
+
+
+---
+
+
+
+
+
+
+
+
 
 
 
