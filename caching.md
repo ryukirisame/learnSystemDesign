@@ -230,8 +230,16 @@ There are several caching strategies, depending on what a system needs - whether
 - Write Through is ideal for consistency-critical systems, such as financial applications or online transaction processing systems, where the cache and database must always have the latest data.
   
 
+## Write Around
 
+<img width="665" height="468" alt="image" src="https://github.com/user-attachments/assets/19b3e969-9580-4faf-9f6c-989da37289eb" />
 
+- Write Around is a caching strategy where data is written directly to the database, bypassing the cache.
+- The cache is only updated when the data is requested later during a read operation, at which point the Cache Aside strategy is used to load the data into the cache.
+- This approach ensures that only frequently accessed data resides in the cache, preventing it from being polluted by data that may not be accessed again soon.
+- Writes are relatively faster because they only target the database and don’t incur the overhead of writing to the cache.
+- TTL can be used to ensure that data does not remain in the cache indefinitely. Once the TTL expires, the data is removed from the cache, forcing the system to retrieve it from the database again if needed.
+- Write Around caching is best used in write-heavy systems where data is frequently written or updated, but not immediately or frequently read such as logging systems.
 
 
 
