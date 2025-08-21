@@ -121,9 +121,14 @@ But in the case of Cache, its a fast memory and all data is stored as key-value 
 
 ## 3. Client-Side Cache
 
+A client-side cache is when the end-user’s device (browser, mobile app, desktop app, etc.) stores data locally so that it doesn’t have to fetch it again from the server on every request.
 
+## 4. Database Cache
 
+A database cache is a layer (in-memory or distributed) that stores results of database queries or objects retrieved from DB so future requests don’t have to hit the database directly.
+This improves latency, throughput, and scalability.
 
+## 5. CDN
 
 
 # Cache Stampede / Dogpile Effect / Thundering Herd Problem
