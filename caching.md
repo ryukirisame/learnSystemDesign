@@ -214,7 +214,21 @@ There are several caching strategies, depending on what a system needs - whether
 - Example: Memcached, Redis (in most common usage)
 
 
+## Write Through
 
+<img width="777" height="256" alt="image" src="https://github.com/user-attachments/assets/57973356-6805-4d60-bd41-6272ea352705" />
+
+- In read-through, the cache automatically loads data from the database on a read miss.
+- In write-through, the cache automatically writes data to the database whenever you update the cache.
+- Your application only talks to the cache (never directly to the DB).
+- The cache acts as a transparent proxy for both reads and writes.
+- Every write operation is executed on both the cache and the database at the same time. This is a synchronous process, meaning both the cache and the database are updated as part of the same operation, ensuring that there is no delay in data propagation.
+- This approach ensures that the cache and the database remain synchronized and the read requests from the cache will always return the latest data, avoiding the risk of serving stale data.
+- In a Write Through caching strategy, cache expiration policies (such as TTL) are generally not necessary. However, if you are concerned about cache memory usage, you can implement a TTL policy to remove infrequently accessed data after a certain time period.
+- Pros: This strategy ensures data consitency between the cache and the database.
+- Cons: Writes are slower than plain DB writes (because every write has to go through cache + DB). Also, if DB is down, writes can fail.
+- Write Through is ideal for consistency-critical systems, such as financial applications or online transaction processing systems, where the cache and database must always have the latest data.
+  
 
 
 
