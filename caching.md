@@ -30,7 +30,7 @@ Von Neumann Bottleneck: Caching helps overcome this bottleneck by serving data f
       - From cache (Redis in-memory): ~0.2ms
       - From database (PostgreSQL, disk involved): ~20 ms
       - Difference: 100x faster.
-2. Reduced loan on backend systems: Caching reduces the number of requests that need to be processed by the backend, freeing up resources for other operations.
+2. Reduced load on backend systems: Caching reduces the number of requests that need to be processed by the backend, freeing up resources for other operations.
 3. Increased Scalability: Caches help in handling a large number of read requests, making the system more scalable.
 4. Cost Efficiency:
    - Fewer database queries or API calls → lower compute and bandwidth costs.
