@@ -344,6 +344,10 @@ Cache.delete(user=123)
 - In cache eviction, data is removed form cache due to memory constraints, not because it's outdated. Its purpose is to manage/optimize cache storage for frequently used data.
 
 
+# Cache Eviction/Replacement Policies
+
+https://blog.algomaster.io/p/7-cache-eviction-strategies
+
 
 
 
