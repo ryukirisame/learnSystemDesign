@@ -290,6 +290,59 @@ There are several caching strategies, depending on what a system needs - whether
 
 - Cache invalidation is the process of removing or updating outdated data from a cache to ensure that only the most recent and accurate information is stored.
 
+## 1. Time-to-Live (TTL) / Expiry
+
+- Each cache entry has a fixed expiration time.
+- After TTL expires, the entry is automatically removed or marked stale.
+- When a request is received for the content, the cache checks the time-to-live value and serves the cached content only if the value hasn’t expired. If the value has expired, the cache fetches the latest version of the content from the origin server and caches it.
+- Cons: Can serve stale data until TTL expires.
+- If TTL is too short → more DB hits. If too long → stale data risk.
+
+## 2. Manual/Programmatic Invalidation (Explicit)
+
+- In this approach, the code responsible for data modification is also tasked with invalidating the corresponding cache. This can be accomplished by issuing an invalidation command whenever data is altered.
+```
+DB.update(user=123, name="Alice")
+Cache.delete(user=123)
+```
+- Pros: Data freshness guaranteed.
+- Cons: If the programmer forgets to invalidate the cache, the stale data will be served.
+- Example: Imagine an e-commerce application. When an administrator updates a product’s price, the price update code also issues a cache invalidation command for that specific product.
+  
+## 3. Write-Through with Invalidation
+
+- Since, in write-through the write operation is done on cache as well as DB synchronously, so cache always contains the latest data -> No invlidation needed.
+
+## 4. Write-Behind (Write-Back) with Invalidation
+- Since, in write-behind strategy, data is always written on cache (and DB is updated asynchronously in the background), there is no need of invalidation because cache acts as the source of truth and always has the latest data.
+
+## 5. Event-Based Invalidation
+
+- When a significant event occurs, such as a data update, a system can dispatch a message or signal to the cache, indicating that certain data has been modified. The cache can then proceed to invalidate the pertinent data. This approach requires a messaging/event infrastructure.
+- In a real-time chat application, when a user sends a message, the messaging server sends an event to all participants in the conversation, signaling an update. This triggers the cache to be invalidated for that specific conversation.
+- Needs pub/sub infra (kafka, Redis Streams, RabbitMQ).
+- Event delivery must be reliable (otherwise stale data persists).
+
+## 6. Lazy Invalidation (Stale-While-Revalidate)
+
+- In this strategy, the cache isn’t immediately invalidated after an update. Instead, it’s marked as “invalid,” and new data is fetched only when someone attempts to access the invalid data.
+- Allows serving slightly stale data while refreshing in the background.
+- Example:
+    -  TTL expired at t=600s.
+    -  User request at t=601s → stale entry served immediately.
+    -  Background thread refreshes entry from DB.
+- Pros: Low latency, no cache miss penalty. Also, good for data that can tolerate slightly stale data. 
+- Cons: Not suitable for critical data (like balances)
+
+
+
+
+
+
+
+
+
+
 
 
 
