@@ -311,7 +311,8 @@ Cache.delete(user=123)
   
 ## 3. Write-Through with Invalidation
 
-- Since, in write-through the write operation is done on cache as well as DB synchronously, so cache always contains the latest data -> No invlidation needed.
+- Since, in write-through the write operation is done on cache as well as DB synchronously, so cache always contains the latest data -> No invalidation needed.
+- However, if another system updates the DB directly (bypassing the cache), then cache can become stale and will need invalidation. So, this strategy only works if all writes go through cache layer.
 
 ## 4. Write-Behind (Write-Back) with Invalidation
 - Since, in write-behind strategy, data is always written on cache (and DB is updated asynchronously in the background), there is no need of invalidation because cache acts as the source of truth and always has the latest data.
