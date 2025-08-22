@@ -349,6 +349,150 @@ Cache.delete(user=123)
 https://blog.algomaster.io/p/7-cache-eviction-strategies
 
 
+# Cache Performance Metrics
+
+### 1. **Hit Rate**
+
+* **Definition**: The percentage of requests served from cache (instead of going to the database/backend).
+
+* **Formula**:
+
+  $$
+  \text{Hit Rate} = \frac{\text{Cache Hits}}{\text{Total Requests}}
+  $$
+
+* **Example**:
+
+  * 1000 total requests
+  * 800 served from cache
+  * Hit rate = 80%
+
+* **Why Important?**
+
+  * Higher hit rate → better cache utilization.
+  * Low hit rate → cache is underperforming (wrong data, wrong eviction policy, too small cache size).
+
+### 2. **Miss Rate**
+
+* **Definition**: The percentage of requests **not** found in cache and served from backend.
+
+* **Formula**:
+
+  $$
+  \text{Miss Rate} = 1 - \text{Hit Rate}
+  $$
+
+* **Example**:
+  If hit rate is 80%, miss rate = 20%.
+
+* **Why Important?**
+
+  * A high miss rate means the cache isn’t helping much. Maybe you’re caching the wrong things.
+
+
+
+### 3. **Eviction Rate**
+
+* **Definition**: How often items are evicted from the cache (because of TTL expiry or memory pressure).
+
+* **Why Important?**
+
+  * A high eviction rate might mean cache size is too small.
+  * If popular keys are evicted too frequently, hit rate will drop.
+
+* **Example**:
+
+  * Cache size = 1000 keys
+  * You insert 10,000 keys in a short time
+  * Eviction rate will be high (depends on policy like LRU/FIFO).
+
+
+
+### 4. **Latency (Cache Access Time)**
+
+* **Definition**: Time to fetch from cache.
+
+  * Memory cache (e.g., in-process) → nanoseconds to microseconds
+  * Distributed cache (e.g., Redis over network) → microseconds to milliseconds
+
+* **Why Important?**
+
+  * Cache should be much faster than DB.
+  * If cache latency is close to DB latency → defeats the purpose.
+
+
+
+### 5. **Staleness / Freshness**
+
+* **Definition**: How up-to-date cached data is compared to the source of truth (DB).
+
+* **Why Important?**
+
+  * High staleness → users see outdated data.
+  * Too aggressive invalidation → defeats purpose of caching.
+  * Balance freshness vs performance.
+
+* **Example**:
+
+  * If product price changes in DB but cache shows old price for 30s, that’s staleness.
+
+
+
+### 6. **Throughput**
+
+* **Definition**: Number of cache operations per second (reads + writes).
+* **Why Important?**
+
+  * Cache cluster must scale with traffic.
+  * Helps capacity planning.
+
+
+
+### 7. **Byte Hit Ratio**
+
+* **Definition**: Percentage of response bytes served from cache (not just number of requests).
+* **Why Important?**
+
+  * Large objects (videos, images) matter more than small ones (tiny JSON).
+  * Example: You may have 90% hit rate but if those are only for small metadata keys, byte hit ratio could still be low.
+
+
+
+### 8. **Cost per Hit**
+
+* **Definition**: Infrastructure cost to serve one cache hit.
+* **Why Important?**
+
+  * A distributed cache like Redis cluster costs money.
+  * You must ensure the cost per hit < cost of DB hit saved.
+
+
+
+##  Example Flow with Metrics
+
+Let’s say you’re building **an e-commerce product catalog**:
+
+* Cache = Redis
+* Backend = MySQL
+
+### Scenario:
+
+* 10,000 requests/min
+* 7,500 served from Redis (hits)
+* 2,500 go to MySQL (misses)
+
+Metrics:
+
+* **Hit Rate** = 75%
+* **Miss Rate** = 25%
+* Average Redis latency = 1ms
+* Average MySQL latency = 40ms
+* Effective latency (weighted avg) = 0.75 × 1 + 0.25 × 40 = \~10.25ms
+
+👉 With cache, avg response time is 10ms.
+👉 Without cache, avg response time would be 40ms.
+👉 Cache saved \~75% load on DB.
+
 
 
 
