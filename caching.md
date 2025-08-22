@@ -279,16 +279,16 @@ There are several caching strategies, depending on what a system needs - whether
 
 - Write Back doesn't require invalidation of cache entries, as the cache itself is the source of truth during the write process.
 - Write Back caching is ideal for write-heavy scenarios where write operations need to be fast and frequent, but immediate consistency with the database is not critical, such as logging systems and social media feeds.
-
+- Example:  Imagine a collaborative document editing application that allows multiple users to make changes to a document simultaneously. When users make changes, those changes are first saved to the cache, allowing the application to respond quickly and provide a smooth editing experience. When certain conditions are met (e.g., the number of changes reaches a certain threshold), the application writes the cached changes back to the data store, updating the document with the latest changes from all users. This approach minimizes the number of write operations to the data store and reduces the load on the storage system, improving the overall performance of the application.
 
 
 <img width="1456" height="860" alt="image" src="https://github.com/user-attachments/assets/10532688-6510-4af4-a13a-3ad86a02c782" />
 
 
 
+# Cache Invalidation Strategies
 
-
-
+- Cache invalidation is the process of removing or updating outdated data from a cache to ensure that only the most recent and accurate information is stored.
 
 
 
