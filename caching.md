@@ -335,7 +335,10 @@ Cache.delete(user=123)
 - Cons: Not suitable for critical data (like balances)
 
 
+# Difference between cache invalidation and eviction
 
+- In cache invalidation, cache is removed **or** marked as invalid when the data in the DB changes. Its purpose is to ensure that cache does not serve stale (outdated) data.
+- In cache eviction, data is removed form cache due to memory constraints, not because it's outdated. Its purpose is to manage/optimize cache storage for frequently used data.
 
 
 
