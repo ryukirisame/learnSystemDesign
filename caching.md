@@ -483,11 +483,31 @@ Miss Rate=1−Hit Rate
 
 ### 8. **Cost per Hit**
 
-* **Definition**: Infrastructure cost to serve one cache hit.
-* **Why Important?**
+* "Cost per hit" measures how much it costs (in infrastructure/resources) to serve one cache hit.
+* Unlike hit ratio or byte hit ratio (which are effectiveness metrics), cost per hit is an efficiency metric — it tells you whether the gains of caching are worth the resources spent.
+* Why do we need this?
+    * Caching isn’t free:
+        * Maintaining RAM caches (Redis, Memcached) is expensive.
+        * SSD caches cost less but have slower lookups.
+        * More cache servers = higher cost.   
+    * A system with 90% hit ratio sounds great… but if you’re spending $10,000/month on caching to save only $8,000/month of origin cost, it’s a net loss.
+    * You must ensure the cost per hit < cost of DB hit saved.
+* Trade-offs: Adding more cache nodes improves hit ratio but also increases cost per hit.
+* Business justification: Is caching saving us money or wasting it?
+#### Example
 
-  * A distributed cache like Redis cluster costs money.
-  * You must ensure the cost per hit < cost of DB hit saved.
+Let’s say you run a video streaming platform:
+- Cache cluster costs: $5,000/month (Redis + infra)
+- Cache serves: 500M hits/month
+- <img width="400"  alt="image" src="https://github.com/user-attachments/assets/4454b0e2-8e10-4559-bc99-21ae8f1a219a" />
+- That’s 1 cent per 1,000 hits → super efficient ✅
+
+
+But suppose you misconfigured and most large videos bypass cache, leaving only small assets in cache:
+- Still $5,000/month cost
+- Only 50M hits/month served
+- <img width="400"  alt="image" src="https://github.com/user-attachments/assets/b0c5eb0a-7360-48b6-9f3f-3c2fb1e5a440" />
+- Now each hit costs 10x more, and caching may no longer be justified unless it’s giving latency benefits.
 
 
 
