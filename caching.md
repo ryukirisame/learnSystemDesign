@@ -289,6 +289,7 @@ There are several caching strategies, depending on what a system needs - whether
 # Cache Invalidation Strategies
 
 - Cache invalidation is the process of removing or updating outdated data from a cache to ensure that only the most recent and accurate information is stored.
+- It ensures cache consitency.
 
 ## 1. Time-to-Live (TTL) / Expiry
 
@@ -319,10 +320,11 @@ Cache.delete(user=123)
 
 ## 5. Event-Based Invalidation
 
-- When a significant event occurs, such as a data update, a system can dispatch a message or signal to the cache, indicating that certain data has been modified. The cache can then proceed to invalidate the pertinent data. This approach requires a messaging/event infrastructure.
+- When a significant event occurs, such as a data update, a system can dispatch a message or signal to the cache, indicating that certain data has been modified. The cache can then proceed to invalidate the relevant data. This approach requires a messaging/event infrastructure.
 - In a real-time chat application, when a user sends a message, the messaging server sends an event to all participants in the conversation, signaling an update. This triggers the cache to be invalidated for that specific conversation.
 - Needs pub/sub infra (kafka, Redis Streams, RabbitMQ).
 - Event delivery must be reliable (otherwise stale data persists).
+- This is often used in distributed systems where multiple cache nodes must stay in sync (multi-region apps, CDNs).
 
 ## 6. Lazy Invalidation (Stale-While-Revalidate)
 
@@ -338,7 +340,7 @@ Cache.delete(user=123)
 
 # Difference between cache invalidation and eviction
 
-- In cache invalidation, cache is removed **or** marked as invalid when the data in the DB changes. Its purpose is to ensure that cache does not serve stale (outdated) data.
+- In cache invalidation, cache is removed **or** marked as invalid when the data in the DB changes. Its purpose is to ensure that cache does not serve stale (outdated) data. 
 - In cache eviction, data is removed form cache due to memory constraints, not because it's outdated. Its purpose is to manage/optimize cache storage for frequently used data.
 
 
