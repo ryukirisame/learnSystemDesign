@@ -378,9 +378,9 @@ https://blog.algomaster.io/p/7-cache-eviction-strategies
 
 * **Formula**:
 
-  $$
-  \text{Miss Rate} = 1 - \text{Hit Rate}
-  $$
+ ```
+Miss Rate=1−Hit Rate
+```
 
 * **Example**:
   If hit rate is 80%, miss rate = 20%.
@@ -450,13 +450,36 @@ https://blog.algomaster.io/p/7-cache-eviction-strategies
 
 ### 7. **Byte Hit Ratio**
 
-* **Definition**: Percentage of response bytes served from cache (not just number of requests).
-* **Why Important?**
-
-  * Large objects (videos, images) matter more than small ones (tiny JSON).
-  * Example: You may have 90% hit rate but if those are only for small metadata keys, byte hit ratio could still be low.
-
-
+* Cache Hit Ratio only tells you the percentage of requests served from cache.
+* Byte Hit Ratio tells you the percentage of data volume (bytes) served from cache.
+* In other words:
+    *  Hit ratio answers: “How often do I avoid going to the origin?”
+    *  Byte hit ratio answers: “How much data (traffic) do I save from going to the origin?”
+* Why is this needed?
+    * Not all requests are equal in size.
+    * A 1 KB CSS file and a 10 MB video file are both single requests.
+    * If your cache serves the 1 KB file but not the 10 MB video, your hit ratio might look good, but in terms of bandwidth saved, it’s almost useless.
+    * That’s why byte hit ratio is often a more realistic measure of caching effectiveness.
+* Formula
+    * <img width="500"  alt="image" src="https://github.com/user-attachments/assets/ca59dc4d-2294-4dce-a382-200829c8408d" />
+* Example
+     * Suppose in one minute you get these requests:
+         * `style.css` → 1 KB (cached) ✅
+         *  `logo.png` → 100 KB (cached) ✅
+         *  `video.mp4` → 100 MB (not cached, from origin) ❌
+    * Hit Ratio
+        * Total requests = 3
+        * Cache hits = 2
+        * Hit Ratio = 2/3 = 66.7%
+    * Byte Hit Ratio
+        * Bytes served from cache = 1 KB + 100 KB = 101 KB
+        * Total bytes requested = 1 KB + 100 KB + 100 MB ≈ 100,101 KB
+        * ByteHitRatio = (101/100101)*100 ~ 0.1%
+    * So, even though your hit ratio is 67%, your cache is basically saving nothing in terms of bandwidth.
+* Where is this useful?
+    *  CDNs (Content Delivery Networks) → They optimize for byte hit ratio since video/image traffic dominates.
+    *  Large-scale systems with heavy media → Byte hit ratio is more important than simple hit ratio.
+    *  Cost savings → Bandwidth savings = $$ saved in cloud infra.
 
 ### 8. **Cost per Hit**
 
