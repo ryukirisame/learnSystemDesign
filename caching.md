@@ -558,6 +558,7 @@ Metrics:
 👉 Cache saved \~75% load on DB.
 
 
+# Difference between CDN and Caching
 
 
 
