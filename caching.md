@@ -443,9 +443,9 @@ Miss Rate=1−Hit Rate
 So basically, the cache system is also a server. Hence, it has a limit on how much it can serve at a time. So, the number of requests/sec the cache server can serve is called throughput.
   
 A cache system is a server (like Redis, Memcached, or even a CDN edge server). Just like any server:
-    -  It has CPU limits (processing requests).
-    -  It has memory or disk I/O limits (storing/reading cached objects).
-    -  It has network limits (bandwidth).
+-  It has CPU limits (processing requests).
+-  It has memory or disk I/O limits (storing/reading cached objects).
+-  It has network limits (bandwidth).
 Because of those limits, it can only serve **X requests per second** reliably.
 That “X” is what we call throughput.
 
