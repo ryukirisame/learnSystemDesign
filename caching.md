@@ -440,12 +440,33 @@ Miss Rate=1−Hit Rate
 
 ### 6. **Throughput**
 
-* **Definition**: Number of cache operations per second (reads + writes).
-* **Why Important?**
+So basically, the cache system is also a server. Hence, it has a limit on how much it can serve at a time. So, the number of requests/sec the cache server can serve is called throughput.
+  
+A cache system is a server (like Redis, Memcached, or even a CDN edge server). Just like any server:
+    -  It has CPU limits (processing requests).
+    -  It has memory or disk I/O limits (storing/reading cached objects).
+    -  It has network limits (bandwidth).
+Because of those limits, it can only serve **X requests per second** reliably.
+That “X” is what we call throughput.
 
-  * Cache cluster must scale with traffic.
-  * Helps capacity planning.
 
+Think of it like:
+- Latency = How fast it answers one request.
+- Throughput = How many requests it can answer per second.
+
+
+For example:
+- A Redis cache might respond in 0.5 ms per request (low latency).
+- But if you send 1 million requests/sec, it will choke because throughput capacity might be only 300k requests/sec.
+
+#### What affects throughput?
+
+- Cache type
+    - Memory caches (Redis, Memcached) → very high throughput (hundreds of thousands ops/sec).
+    - Disk caches (SSD-based, CDN edge caches) → lower throughput due to I/O.
+- Data size per request (large objects take more time).
+- Network bandwidth (especially for CDN throughput).
+- Concurrency (single-threaded Redis vs. sharded Redis cluster).
 
 
 ### 7. **Byte Hit Ratio**
