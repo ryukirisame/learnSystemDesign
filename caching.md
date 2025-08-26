@@ -560,7 +560,7 @@ Metrics:
 
 # Difference between CDN and Caching
 
-- Caching is a general concept of storing data temporarily for faster future access. It can exist at many layers: application cache, database cache, browser cache, os cache.
+- Caching is a general concept of storing data temporarily for faster future access. It can exist at many layers: application cache, database cache, browser cache, OS cache.
 - While, CDN is a specialized implemenation of caching. It is a distributed cache with the specific goal of reducing latency by bringing web content physically closer to users.
 - All CDNs use caching, but not all caches are CDNs.
 
