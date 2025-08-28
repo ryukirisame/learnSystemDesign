@@ -119,6 +119,8 @@ It's through some **HTTP headers**:
 * Sent by origin to CDN included in the response the first time the content is fetched.
 * Think of it as a file fingerprint (hash or unique ID).
 * CDN stores this value with the cached file.
+* Changes when the content/file changes.
+* 
 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag
 
 ### 2. If-None-Match - Request header
