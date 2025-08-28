@@ -581,12 +581,15 @@ HTTP caching is about storing HTTP responses (HTML, CSS, JS, images, API respons
 - The closer the client and cache are, the faster the response will be. The most typical example is when the browser itself stores a cache for browser requests.
 
 ## Types of HTTP Cache
+
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/779a60ac-3bb5-4abc-ab7c-2a362bd4720d" />
+
 1. Private - Accessible just by the client. Used to store sensitive/personalized information. Browsers cache are private.
 2. Shared - Accessible by many users. 
     1. Proxy Caches 
     2. Managed Caches
    
-HTTP cache headers are more like suggestions than commands. Any cache can choose to ignore them. So, even if the server sends the `cache-control` headers, its upto the receiver, if they want to respect the header or not. 
+HTTP cache headers are more like **suggestions** than **commands**. Any cache can choose to ignore them. So, even if the server sends the `cache-control` headers, its upto the receiver, if they want to respect the header or not. 
 
 So basically, it makes the shared caches divided into two categories: 
 1. Managed Caches: One, who respects the `cache-control` header
@@ -596,6 +599,7 @@ The one who respects the header is typically the one the server owner has some c
 
 As for the ones who doesnt respect the cache headers, they are typically the ones the server does not have any control over. For example: proxy servers, ISP caches. They could ignore the cache headers and can enforce their own caching policies.
    
+
 
 
 
