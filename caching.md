@@ -630,12 +630,12 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 
 #### Possible values/directives for `Cache-Control` header:
 1. `Cache-Control: Private`
-- It means the cache is private to the user.
+- It means the content can be cached by private cache (browser) ONLY.
 - The response will only be cached in the client/browser.
 
 2. `Cache-Control: Public`
-- It means the cache should be available to multiple users.
-- It can be cached publicly at any intermediary location: Proxy, Reverse Proxy, CDNs, ISP etc.
+- It means the content can be cached by ANY cache: private and public
+- Content can be cached at any location: Browser, Proxy, Reverse Proxy, CDNs, ISP etc.
 
 3. `Cache-Control: no-store`
 - It means "Don't cache at all (for sensitive data)".
@@ -657,13 +657,15 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 7. `Cache-Control: max-age=<seconds>, must-revalidate`
 - This response directive indicates that the response can be stored in caches and can be reused while fresh. If the response becomes stale, it must be validated with the origin server before reuse.
 - Typically, must-revalidate is used with max-age.
-- This directive prevents serving stale content: HTTP allows caches to reuse stale responses when they are disconnected from the origin server. `must-revalidate` is a way to prevent this from happening - either the stored response is revalidated with the origin server or a 504 (Gateway Timeout) response is generated. 
+- This directive prevents serving stale content: HTTP allows caches to reuse stale responses when they are disconnected from the origin server. `must-revalidate` is a way to prevent this from happening - either the stored response is revalidated with the origin server or a 504 (Gateway Timeout) response is generated.
+- Applies to all: Private and Public caches
 
 8. `Cache-Control: max-age=<seconds>, proxy-revalidate`
 - Same as `must-revalidate` but specifically for shared caches.
 - Example: `Cache-Control: max-age=600, proxy-revalidate` : Since `must-revalidate` is not present, the client is allowed to serve stale content if the server is not reachable. But, the proxy can't. Because, proxy must revalidate.
 
-
+#### We can mix directives to achieve different caching behaviors
+`Cache-Control: max-age=3600, s-max-age=600, public, must-revalidate`
 
 ### Validator Headers - Used by client to make sure the cached the data is still usable.
 1. `ETag`
