@@ -564,9 +564,12 @@ Metrics:
 - While, CDN is a specialized implemenation of caching. It is a distributed cache with the specific goal of reducing latency by bringing web content physically closer to users.
 - All CDNs use caching, but not all caches are CDNs.
 
+# HTTP Caching (Web Caching)
+HTTP caching is about storing HTTP responses (HTML, CSS, JS, images, API responses, etc.) so that future requests can be served faster without always hitting the origin server.
 
-
-
+There are two main location:
+1. Browser Cache → Lives on the client machine.
+2. Intermediate Caches → CDN, reverse proxies (like Varnish, Nginx), or ISP caches.
 
 
 
