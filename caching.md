@@ -668,11 +668,21 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 #### We can mix directives to achieve different caching behaviors
 `Cache-Control: max-age=3600, s-max-age=600, public, must-revalidate`
 
-### Validator Headers - Used by client to make sure the cached the data is still usable.
-1. `ETag`
+### Validator Headers 
+
+https://github.com/ryukirisame/learnSystemDesign/blob/main/CDN.md#how-to-optimize-re-fetch-in-pull-cdns
+
+- These headers are identifiers that help determine whether a cached resource is still the same as the version on the server. They enable conditional requests to check if content has changed without downloading the entire resource.
+- The server sends one or more validation headers in the response, which are used by the client to make a conditional request to the server.
+
+#### Headers: 
+1. `ETag` 
 2. `If-None-Match`
 3. `Last-Modified`
 4. `If-Modified-Since`
+
+#### What if `ETag` or `Last-Modified` headers are not present in server response? 
+That means no conditional requests can be made. So, the server will always respond with the content when asked about a resource.
 
 
 
