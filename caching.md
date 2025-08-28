@@ -39,6 +39,11 @@ Von Neumann Bottleneck: Caching helps overcome this bottleneck by serving data f
   - If the database or API is temporarily down, cached data can still serve requests.
   - Example: A social media app can still show cached timelines even if the backend is experiencing issues.
 6. Enhanced User Experience: Faster response times lead to a better user experience, particularly for web and mobile applications.
+
+# Benefits
+1. Reduced latency
+2. Cuts down the bandwidth
+3. Reduced load on the server
       
 
 # Why caching is scalable but database is not?
@@ -567,9 +572,33 @@ Metrics:
 # HTTP Caching (Web Caching)
 HTTP caching is about storing HTTP responses (HTML, CSS, JS, images, API responses, etc.) so that future requests can be served faster without always hitting the origin server.
 
-There are two main location:
-1. Browser Cache → Lives on the client machine.
-2. Intermediate Caches → CDN, reverse proxies (like Varnish, Nginx), or ISP caches.
+#### Responses can be cached at the following possible locations: 
+1. Browser Cache → Lives on the client machine. Private to the user.
+2. Proxy Server
+3. Reverse Proxy Server
+4. CDNs
+
+- The closer the client and cache are, the faster the response will be. The most typical example is when the browser itself stores a cache for browser requests.
+
+## Types of HTTP Cache
+1. Private - Accessible just by the client. Used to store sensitive/personalized information. Browsers cache are private.
+2. Shared - Accessible by many users. 
+    1. Proxy Caches 
+    2. Managed Caches
+   
+HTTP cache headers are more like suggestions than commands. Any cache can choose to ignore them. So, even if the server sends the `cache-control` headers, its upto the receiver, if they want to respect the header or not. 
+
+So basically, it makes the shared caches divided into two categories: 
+1. Managed Caches: One, who respects the `cache-control` header
+2. Proxy Caches: The other one who doesnt.
+
+The one who respects the header is typically the one the server owner has some control over. For example: CDNs like cloudflare. **WE** configure Cloudflare's cache rules through their dashboard. We can set custom rules like "cache all images for 30 days" even if our server sends different headers. Everything is under our control (the serve/service owner)
+
+As for the ones who doesnt respect the cache headers, they are typically the ones the server does not have any control over. For example: proxy servers, ISP caches. They could ignore the cache headers and can enforce their own caching policies.
+   
+
+
+
 
 
 
