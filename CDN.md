@@ -120,7 +120,11 @@ It's through some **HTTP headers**:
 * Think of it as a file fingerprint (hash or unique ID).
 * CDN stores this value with the cached file.
 * Changes when the content/file changes.
-* 
+* There are two types of ETags: Strong and Weak: 
+  ```
+  ETag: "abc123def456"  // The two resources are EXACTLY same and there is no different between them at all.
+  ETag: W/"weak-etag-value"  // The two resources are although not strictly same, but could be considered same.
+  ```
 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag
 
 ### 2. If-None-Match - Request header
