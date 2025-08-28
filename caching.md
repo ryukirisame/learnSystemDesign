@@ -646,7 +646,8 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 - Re-validation is done using `E-Tag` header. 
 
 5. `Cache-Control: max-age=<seconds>`
-- Tells the client that the content can be cached for the given number of seconds.
+- The content can be cached for the given number of seconds.
+- Applies to both: Private and Public cache.
 - Example: `Cache-Control: max-age=3600, public` It means the value can be cached for 3600 seconds at any public cache.
 
 6. `Cache-Control: s-max-age=<seconds>`
