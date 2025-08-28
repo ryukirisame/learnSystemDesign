@@ -634,7 +634,7 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 - The response will only be cached in the client/browser.
 
 2. `Cache-Control: Public`
-- It means the content can be cached by ANY cache: private and public
+- It means the content can be cached by ANY cache: private and shared
 - Content can be cached at any location: Browser, Proxy, Reverse Proxy, CDNs, ISP etc.
 
 3. `Cache-Control: no-store`
@@ -647,7 +647,7 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 
 5. `Cache-Control: max-age=<seconds>`
 - The content can be cached for the given number of seconds.
-- Applies to both: Private and Public cache.
+- Applies to both: Private and Shared cache.
 - Example: `Cache-Control: max-age=3600, public` It means the value can be cached for 3600 seconds at any public cache.
 
 6. `Cache-Control: s-max-age=<seconds>`
