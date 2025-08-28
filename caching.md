@@ -9,7 +9,7 @@
 9. Caching in Web (HTTP Caching)
 10. Real-World examples
 11. Benefits & Problems in caching
-12. 
+
 
 Caching is about trading freshness for speed & efficiency.
 The hard parts are invalidating correctly, choosing what to cache, and handling edge cases under load.
