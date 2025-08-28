@@ -686,6 +686,28 @@ https://github.com/ryukirisame/learnSystemDesign/blob/main/CDN.md#how-to-optimiz
 That means no conditional requests can be made. So, the server will always respond with the content when asked about a resource.
 
 
+## Heuristic Caching
+When the server do not provide caching headers in the response, the cache falls back to a method called **heuristic caching** in which the cache tries to **guess** "for how long the content should be cached based on whatever information is available".
+
+### Heuristic Caching Behavior
+
+**The 10% Rule** - This is the most common heuristic. If a `Last-Modified` header is present, browsers typically cache the resource for about 10% of its age:
+- If a file was last modified 100 days ago, cache it for ~10 days
+- If modified 1 day ago, cache for ~2.4 hours
+
+**Without Last-Modified** - Behavior becomes much less predictable and varies significantly between browsers:
+- Some browsers might cache for a very short time (minutes)
+- Others might not cache at all
+- Some may cache based on content type (images vs HTML vs CSS)
+
+## Browser Variations
+
+Different browsers implement different heuristics:
+- **Chrome/Edge** - Generally follow the 10% rule when Last-Modified exists
+- **Firefox** - Similar but with different fallback behaviors
+- **Safari** - Has its own heuristic algorithms
+
+
 
 
 
