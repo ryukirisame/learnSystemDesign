@@ -600,6 +600,37 @@ The one who respects the header is typically the one the server owner has some c
 As for the ones who doesnt respect the cache headers, they are typically the ones the server does not have any control over. For example: proxy servers, ISP caches. They could ignore the cache headers and can enforce their own caching policies.
    
 
+## Caching headers 
+Whenever the server responds to the client, it sends the http headers along with the response. 
+The caching behaviors of browsers and shared caches is controlled by the following headers:
+1. `Expires`
+2. `Pragma`
+3. `Cache-Control`
+
+- `Expires` and `Pragma` existed before HTTP 1.1 and they are not used as much. They are used here and there for backward compatibility.
+- `Cache-Control` was introduced in HTTP 1.1 and it is the preferred header for caching.
+
+### 1. `Expires`
+- Syntax: `Expires: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT`
+- The HTTP Expires response header contains the absolute date/time after which the response is considered expired.
+- Note: If there is a `Cache-Control` header with the `max-age` or `s-maxage` directive in the response, the `Expires` header is ignored.
+- Clocks have to be in sync.
+- Can't be more than a year.
+- If you provide wrong date format, the response will be considered stale. So, this directive is very error-prone.
+
+### Validator Headers - Used by client to make sure the cached the data is still usable.
+1. `ETag`
+2. `If-None-Match`
+3. `Last-Modified`
+4. `If-Modified-Since`
+
+
+
+
+
+
+
+
 
 
 
