@@ -643,7 +643,8 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 
 4. `Cache-Control: no-cache`
 - It means the content can be cached, but for the client to re-use it, it must first re-validate from the server.
-- Re-validation is done using `E-Tag` header. 
+- Re-validation is done using `E-Tag` header.
+
 
 5. `Cache-Control: max-age=<seconds>`
 - The content can be cached for the given number of seconds.
