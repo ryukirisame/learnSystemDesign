@@ -602,6 +602,7 @@ As for the ones who doesnt respect the cache headers, they are typically the one
 
 ## Caching headers 
 Whenever the server responds to the client, it sends the http headers along with the response. 
+
 The caching behaviors of browsers and shared caches is controlled by the following headers:
 1. `Expires`
 2. `Pragma`
@@ -616,7 +617,53 @@ The caching behaviors of browsers and shared caches is controlled by the followi
 - Note: If there is a `Cache-Control` header with the `max-age` or `s-maxage` directive in the response, the `Expires` header is ignored.
 - Clocks have to be in sync.
 - Can't be more than a year.
-- If you provide wrong date format, the response will be considered stale. So, this directive is very error-prone.
+- If you provide wrong date format, or invalid value, the response will be considered stale. So, this directive is very error-prone.
+
+### 2. `Pragma`
+- It has just one possible value: `no-cache`
+- Example: `Pragma: no-cache`
+- To prevent caching.
+- `Cache-Control` should be preferred over this.
+
+### 3. `Cache-Control`
+- It's a multi-valued header. So, it can have multiple values/directives and they determine the caching behavior.
+
+#### Possible values/directives for `Cache-Control` header:
+1. `Cache-Control: Private`
+- It means the cache is private to the user.
+- The response will only be cached in the client/browser.
+
+2. `Cache-Control: Public`
+- It means the cache should be available to multiple users.
+- It can be cached publicly at any intermediary location: Proxy, Reverse Proxy, CDNs, ISP etc.
+
+3. `Cache-Control: no-store`
+- It means "Don't cache at all (for sensitive data)".
+- So, everytime client makes a request for a resource, the resource will be served from the origin server directly.
+
+4. `Cache-Control: no-cache`
+- It means the content can be cached, but for the client to re-use it, it must first re-validate from the server.
+- Re-validation is done using `E-Tag` header. 
+
+5. `Cache-Control: max-age=<seconds>`
+- Tells the client that the content can be cached for the given number of seconds.
+- Example: `Cache-Control: max-age=3600, public` It means the value can be cached for 3600 seconds at any public cache.
+
+6. `Cache-Control: s-max-age=<seconds>`
+- The prefix 's' stands for shared.
+- It is the same as `max-age`, but gives a caching duration for 'shared' caches.
+- In case of `Cache-Control: max-age=600, s-max-age=3600` it means private caches can cache the content for 600s and shared caches can cache the content for 3600s.
+
+7. `Cache-Control: max-age=<seconds>, must-revalidate`
+- This response directive indicates that the response can be stored in caches and can be reused while fresh. If the response becomes stale, it must be validated with the origin server before reuse.
+- Typically, must-revalidate is used with max-age.
+- This directive prevents serving stale content: HTTP allows caches to reuse stale responses when they are disconnected from the origin server. `must-revalidate` is a way to prevent this from happening - either the stored response is revalidated with the origin server or a 504 (Gateway Timeout) response is generated. 
+
+8. `Cache-Control: max-age=<seconds>, proxy-revalidate`
+- Same as `must-revalidate` but specifically for shared caches.
+- Example: `Cache-Control: max-age=600, proxy-revalidate` : Since `must-revalidate` is not present, the client is allowed to serve stale content if the server is not reachable. But, the proxy can't. Because, proxy must revalidate.
+
+
 
 ### Validator Headers - Used by client to make sure the cached the data is still usable.
 1. `ETag`
