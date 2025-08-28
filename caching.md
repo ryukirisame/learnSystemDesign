@@ -589,15 +589,16 @@ HTTP caching is about storing HTTP responses (HTML, CSS, JS, images, API respons
     1. Proxy Caches 
     2. Managed Caches
    
-HTTP cache headers are more like **suggestions** than **commands**. Any cache can choose to ignore them. So, even if the server sends the `cache-control` headers, its upto the receiver, if they want to respect the header or not. 
+HTTP cache headers are more like **suggestions/directives** than **commands**. Any cache can choose to ignore them. So, even if the server sends the `cache-control` headers, its upto the receiver, if they want to respect the header or not. 
 
 So basically, it makes the shared caches divided into two categories: 
-1. Managed Caches: One, who respects the `cache-control` header
-2. Proxy Caches: The other one who doesnt.
+1. Managed Caches: almost always respect headers (because you can control them and can configure them)
+2. Proxy Caches: typically DO respect headers too (they're "good citizens"), but **may** choose not to, as they are not under our(application owners) control.
 
-The one who respects the header is typically the one the server owner has some control over. For example: CDNs like cloudflare. **WE** configure Cloudflare's cache rules through their dashboard. We can set custom rules like "cache all images for 30 days" even if our server sends different headers. Everything is under our control (the serve/service owner)
+The cache that we(the application owner) can control and configure are Managed Cache. For example: CDNs like cloudflare. **WE** configure Cloudflare's cache rules through their dashboard. We can set custom rules like "cache all images for 30 days" even if our server sends different headers. Everything is under our control (the server/service owner)
 
-As for the ones who doesnt respect the cache headers, they are typically the ones the server does not have any control over. For example: proxy servers, ISP caches. They could ignore the cache headers and can enforce their own caching policies.
+As for the caches who are not under our control, they are free to choose to override their own behavior. For example: proxy servers, ISP caches. They could ignore the cache headers and can enforce their own caching policies.
+
    
 
 ## Caching headers 
