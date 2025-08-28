@@ -700,7 +700,7 @@ When the server do not provide caching headers in the response, the cache falls 
 - Others might not cache at all
 - Some may cache based on content type (images vs HTML vs CSS)
 
-## Browser Variations
+### Browser Variations
 
 Different browsers implement different heuristics:
 - **Chrome/Edge** - Generally follow the 10% rule when Last-Modified exists
