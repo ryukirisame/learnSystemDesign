@@ -50,7 +50,33 @@ This goes on and on. The cache never really serves any data. Hit ratio = 0%. Thi
 
 Solutions:
 ### 1. Admission Policies (Don't Cache Everything)
-- 
+
+- Admission policies decide whether a new item **should** enter the cache when there's limited space. They act as gatekeepers to prevent cache pollution.
+
+#### Common Admission Policy Types:
+1. Threshold-Based Admission 
+- Only admit items that have been accessed X times
+- Example: "Only cache items accessed ≥ 3 times"
+- Pros: Prevents one-hit wonders, simple to implement
+- Cons: May miss items that become hot after first access
+
+2. Probabilistic Admission
+- Admit items with some probability (e.g., 50% chance)
+- Can be based on cache load, item size, etc.
+- Pros: Simple, provides natural filtering
+- Cons: May randomly reject useful items
+  
+3. Size-Based Admission
+- Reject items larger than a certain size
+- Example: "Don't cache objects > 1MB"
+- Pros: Prevents large items from dominating cache
+- Cons: Size doesn't correlate with utility
+
+
+### 2. Eviction Policies Beyond LRU
+- LRU (Least Recently Used) alone is bad for random workloads.
+- LFU is better in this case. It keeps frequently accessed items longer.
+
 
 
 ## How to Prevent Thrashing
