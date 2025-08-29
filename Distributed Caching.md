@@ -37,11 +37,10 @@ This goes on and on. The cache never really serves any data. Hit ratio = 0%. Thi
     - Every request becomes a cache miss.
     - The cache will keep evicting old items to make space for new ones, but since none of them are reused, those evictions are pointless. 
 
-
-
 ### 4. Cache Pollution
+- This is when low-value or one-time-use data fills up the cache and evicts hot data (frequently used items).
+- So imagine a scenario when a large data enters the cache and it's going to be used just for once. Just to put this data into cache, a lot of other items must have been evicted which were frequently used. This reduces hit ratio.
 
-### 5. Distributed Cache Thrashing
 
 ## How Modern Caches Handle Randomness
 
@@ -80,14 +79,31 @@ Solutions:
 
 
 ## How to Prevent Thrashing
-- Right-Sized Cache
-- Better eviction policies
+
+### Right-Sized Cache
+
+### Better eviction policies
+
+### Segregation
+Not all requests are equal. Some are hot traffic (frequently used) and some are cold (rarely requested).
+
+1. Hot Traffic - Interactive queries
+- Example: User profile lookups, shopping cart items.
+- Small set of items accessed repeatedly.
+- Perfect candidates for caching.
+
+2. Cold Traffic - Batch jobs / scans
+- Example: Analytics queries, ETL pipelines, recommendation model training.
+- Access a huge amount of data once or twice.
+- Poor candidates for caching.
+- If they share the same cache → they evict hot items used by real users.
 
 
-
-
-
-
+- This mixing leads to cache pollution → hot interactive data gets pushed out by cold batch data → thrashing.
+- So the idea is to keep the two types of data in separate caches.
+- This could be achieved by:
+  - Physically separate caches - one cache cluster for hot data and other cluster for cold data.
+  - Logically separate caches - Same cache cluster, but partition memory into regions: 70% memory for interactive traffic (hot) and 30% for batch jobs (cold)
 
 
 
