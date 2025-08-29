@@ -40,6 +40,7 @@ This goes on and on. The cache never really serves any data. Hit ratio = 0%. Thi
 ### 4. Cache Pollution
 - This is when low-value or one-time-use data fills up the cache and evicts hot data (frequently used items).
 - So imagine a scenario when a large data enters the cache and it's going to be used just for once. Just to put this data into cache, a lot of other items must have been evicted which were frequently used. This reduces hit ratio.
+- Example: A nightly ETL job scans through 10GB of historical data (used once), evicting 1GB of user session data (accessed thousands of times daily).
 
 
 ## How Modern Caches Handle Randomness
@@ -109,6 +110,9 @@ Not all requests are equal. Some are hot traffic (frequently used) and some are 
 - This could be achieved by:
   - Physically separate caches - one cache cluster for hot data and other cluster for cold data.
   - Logically separate caches - Same cache cluster, but partition memory into regions: 70% memory for interactive traffic (hot) and 30% for batch jobs (cold)
+- Industry Examples
+    - Netflix: Separate caches for user data vs analytics
+    - Facebook: Different cache tiers for different content types
 
 
 
