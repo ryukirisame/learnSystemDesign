@@ -71,6 +71,11 @@ Solutions:
 - Pros: Prevents large items from dominating cache
 - Cons: Size doesn't correlate with utility
 
+4. Frequency-Based Admission (like TinyLFU)
+- Compare item frequencies before admitting
+- Only admit if new item is "more worthy" than victim
+- Pros: Makes optimal trade-offs
+- Cons: Requires frequency tracking
 
 ### 2. Eviction Policies Beyond LRU
 - LRU (Least Recently Used) alone is bad for random workloads.
