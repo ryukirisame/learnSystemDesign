@@ -104,7 +104,7 @@ Not all requests are equal. Some are hot traffic (frequently used) and some are 
     - Poor candidates for caching.
     - If they share the same cache → they evict hot items used by real users.
 
-<br> <br>
+
 
 - This mixing leads to cache pollution → hot interactive data gets pushed out by cold batch data → thrashing.
 - So the idea is to keep the two types of data in separate caches.
