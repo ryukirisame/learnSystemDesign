@@ -71,7 +71,7 @@ Solutions:
 - Pros: Prevents large items from dominating cache
 - Cons: Size doesn't correlate with utility
 
-4. Frequency-Based Admission (like TinyLFU)
+4. Frequency-Based Admission (like TinyLFU  used in Caffeine)
 - Compare item frequencies before admitting
 - Only admit if new item is "more worthy" than victim
 - Pros: Makes optimal trade-offs
@@ -85,11 +85,11 @@ Solutions:
 
 ## How to Prevent Thrashing
 
-### Right-Sized Cache
+### 1. Right-Sized Cache
 
-### Better eviction policies
+### 2. Better eviction policies
 
-### Segregation
+### 3. Segregation
 Not all requests are equal. Some are hot traffic (frequently used) and some are cold (rarely requested).
 
 1. Hot Traffic - Interactive queries
