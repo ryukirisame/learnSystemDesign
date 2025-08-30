@@ -40,8 +40,8 @@ Where should the cache live? That's what we are going to see now.
 - Dedicated cache servers are standalone machines or virtual instances used only for caching.
 - They are separate from the application servers and are optimized for caching.
 - So basically, there will be a cluster of nodes which will store only cache data.
-- This cluster of cache is shared across all the application servers. So, all the application servers will see the same cache data. (Data Consistency)
-- This approach is highly scalable. Just add or remove one node from the cluster.
+- Since all application servers share the same cache cluster, they see the same cached values, avoiding inconsistencies across nodes.
+- Compute and cache layers can be scaled independently, giving flexibility under high read workloads.
 - If lets say Application Server A fails, the cache can still be accessible by other application servers unlike in the case of Co-located cache.
 - Since a network call needs to be made to access the cache, so slighly slower than Co-located cache.
 - High cost, since we need dedicated servers.
@@ -58,10 +58,23 @@ Where should the cache live? That's what we are going to see now.
 - Simple: No separate infra to manage.
 - If Server A fails, Cache A will also be unavailable.
 - Data sync problem: one server’s cache may be stale, others fresh.
-- Scalability issues: We can only have same number of cache as the application servers. We cannot scale cache independently.
+- Scalability issues: We can only have same number of cache as the application servers. We cannot scale cache independently. If you need more cache without more application servers, you cannot do that.
 - If a server restarts -> Cache also restarts.
 - The cache and the application use the same server resources like CPU memory, and I/O. This can slow things down under high load, if both demand significant resources.
 - Ex: Caffeine, Guava 
+
+### Data Fragmentation Issue
+
+- Example: E-commerce site with 3 app servers (A, B, C)
+- Now users browse products:
+    -  User 1’s request goes to Server A → it fetches Product 101 from DB → caches it locally.
+    -  Later, User 2’s request goes to Server B → it also fetches Product 101 from DB → caches it locally.
+    -  Then, User 3’s request goes to Server C → same story, Product 101 cached locally again.    
+- End result:
+    - Product 101 exists in 3 separate caches (A, B, C).
+    - That’s 3× memory usage for the same data.
+- With dedicated cache servers, this duplication wouldn’t happen: Product 101 would live in cache once, and all app servers would reuse it.
+
 
 If you need your system to handle a lot of users, keep resources separate, and have the budget for it, using dedicated cache servers is likely the better option.
 
@@ -75,7 +88,9 @@ But if your app is smaller, you want to save money, or need it to be super fast,
 - Example: Netflix EVCache (local + Memcached).
 - L1 avoids network hops for hot data.
 - L2 ensures consistency & scalability.
+- Local misses fall back to the distributed cache, reducing DB load.
 - Reduces load on distributed cache.
+- Complexity increases — cache invalidation, coherence, and memory management are harder.
 
 # Data Distribution Strategies
 ### Consistent Hashing 
