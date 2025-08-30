@@ -1,4 +1,28 @@
 
+# Distributed Caching
+
+- When our dataset is small, it's usually enough to keep all the cache data on one server.
+- But as our data grows, a single cache will not be enough to handle millions of users and massive datasets.
+- In such scenarios, we distribute the cache data across multiple servers.
+- Distributed caching is a technique where cache data is stored across multiple nodes (servers) instead of being confined to a single machine.
+- This allows the cache to scale horizontally and accommodate the needs of large-scale applications.
+
+## Components of Distributed Caching
+
+#### 1. Cache Nodes
+These are the individual servers where the cache data is stored. Each node is a part of the overall cache cluster.
+
+#### 2. Client Library/Cache Client
+- Client library is a software component/library/SDK that provides an interface for applications to interact with distributed cache systems like Redis, Memcached, or Apache Ignite. This library handles the logic of connecting to cache nodes, distributing data, and retrieving cached data.
+- Cache client is the actual running instance or object that connects and talks to the cache server.
+- Client Library = The software package you install
+    - npm install redis (Node.js)
+    - pip install redis (Python)
+    - <dependency>jedis</dependency> (Java)
+- Cache Client = The object you create from that library
+    - const client = redis.createClient()
+    - client = redis.Redis()
+    - Jedis jedis = new Jedis()
 
 
 # Thrashing
