@@ -33,7 +33,7 @@ Dataset is split into smaller and manageable pieces called shards. Each shard is
 # Dedicated Cache Servers vs Co-located Cache
 Where should the cache live? That's what we are going to see now.
 
-## 1. Dedicated Cache Servers
+## 1. Dedicated Cache Servers (Global Cache)
 
 <img width="1456" height="1054" alt="image" src="https://github.com/user-attachments/assets/534bb746-4f26-47ce-8530-5e4ae1c68f52" />
 
@@ -46,6 +46,25 @@ Where should the cache live? That's what we are going to see now.
 - Since a network call needs to be made to access the cache, so slighly slower than Co-located cache.
 - High cost, since we need dedicated servers.
 - Ex: Redis, Memcached
+
+## 2. Co-located Cache (In-Memory Cache)
+
+<img width="1456" height="1188" alt="image" src="https://github.com/user-attachments/assets/f8233ea4-f981-417d-aa5d-0b786b7c5918" />
+
+- Co-located cache means running the cache and the application on the same server.
+- In this setup, the application and the cache share the same hardware resources, such as CPU, memory, and network interfaces.
+- Since both the cache and the application are on the same server, accessing the cache is very quick, as no network call needs to be made. This is ideal for applications where every millisecond counts, like real-time gaming or high-frequency trading platforms.
+- Co-locating the cache with the application can be more cost-effective, especially for small to medium-sized applications.
+- Simple: No separate infra to manage.
+- If Server A fails, Cache A will also be unavailable.
+- Data sync problem: one server’s cache may be stale, others fresh.
+- Scalability issues: We can only have same number of cache as the application servers. We cannot scale cache independently.
+- If a server restarts -> Cache also restarts.
+- The cache and the application use the same server resources like CPU memory, and I/O. This can slow things down under high load, if both demand significant resources.
+- Ex: Caffeine, Guava 
+
+
+
 
 
 # Data Distribution Strategies
