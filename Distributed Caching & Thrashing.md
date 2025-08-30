@@ -63,9 +63,19 @@ Where should the cache live? That's what we are going to see now.
 - The cache and the application use the same server resources like CPU memory, and I/O. This can slow things down under high load, if both demand significant resources.
 - Ex: Caffeine, Guava 
 
+If you need your system to handle a lot of users, keep resources separate, and have the budget for it, using dedicated cache servers is likely the better option.
+
+But if your app is smaller, you want to save money, or need it to be super fast, putting the cache and app on the same server can work well.
 
 
+## 3. Hybrid Approach (Multi-level Cache)
 
+- L1 (local, co-located) → fastest access.
+- L2 (dedicated, distributed) → consistent, scalable source.
+- Example: Netflix EVCache (local + Memcached).
+- L1 avoids network hops for hot data.
+- L2 ensures consistency & scalability.
+- Reduces load on distributed cache.
 
 # Data Distribution Strategies
 ### Consistent Hashing 
