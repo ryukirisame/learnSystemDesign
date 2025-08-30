@@ -16,13 +16,34 @@ These are the individual servers where the cache data is stored. Each node is a 
 - Client library is a software component/library/SDK that provides an interface for applications to interact with distributed cache systems like Redis, Memcached, or Apache Ignite. This library handles the logic of connecting to cache nodes, distributing data, and retrieving cached data.
 - Cache client is the actual running instance or object that connects and talks to the cache server.
 - Client Library = The software package you install
-    - npm install redis (Node.js)
-    - pip install redis (Python)
-    - <dependency>jedis</dependency> (Java)
+    - `npm install redis` (Node.js)
+    - `pip install redis` (Python)
+    - `<dependency>jedis</dependency>` (Java)
 - Cache Client = The object you create from that library
-    - const client = redis.createClient()
-    - client = redis.Redis()
-    - Jedis jedis = new Jedis()
+    - `const client = redis.createClient()`
+    - `client = redis.Redis()`
+    - `Jedis jedis = new Jedis()`
+
+#### 3. Replication
+To make the system more reliable, some distributed caches replicate data across multiple nodes. If one node goes down, the data is still available on another.
+
+#### 4. Sharding
+Dataset is split into smaller and manageable pieces called shards. Each shard is stored on different cache node. It helps distribute the data evenly and allows the cache to scale horizontally.
+
+
+
+## Data Distribution Strategies
+### Consistent Hashing 
+- The most common approach where keys are mapped to nodes using a hash function. 
+- When nodes are added or removed, only a small portion of data needs to be redistributed. This minimizes cache invalidation during scaling operations.
+  
+### Hash-based Partitioning
+- Simple modulo-based distribution where `node = hash(key) % number_of_nodes`.
+- While easy to implement, adding or removing nodes requires significant data redistribution.
+
+### Range-based Partitioning
+- Data is distributed based on key ranges assigned to different nodes.
+- This works well when you can predict access patterns but can lead to hotspots.
 
 
 # Thrashing
