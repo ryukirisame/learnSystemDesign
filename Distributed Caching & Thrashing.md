@@ -35,7 +35,7 @@ Where should the cache live? That's what we are going to see now.
 
 ## 1. Dedicated Cache Servers (Global Cache)
 
-<img width="1456" height="1054" alt="image" src="https://github.com/user-attachments/assets/534bb746-4f26-47ce-8530-5e4ae1c68f52" />
+<img width="700"  alt="image" src="https://github.com/user-attachments/assets/534bb746-4f26-47ce-8530-5e4ae1c68f52" />
 
 - Dedicated cache servers are standalone machines or virtual instances used only for caching.
 - They are separate from the application servers and are optimized for caching.
@@ -49,7 +49,7 @@ Where should the cache live? That's what we are going to see now.
 
 ## 2. Co-located Cache (In-Memory Cache)
 
-<img width="1456" height="1188" alt="image" src="https://github.com/user-attachments/assets/f8233ea4-f981-417d-aa5d-0b786b7c5918" />
+<img width="700"  alt="image" src="https://github.com/user-attachments/assets/f8233ea4-f981-417d-aa5d-0b786b7c5918" />
 
 - Co-located cache means running the cache and the application on the same server.
 - In this setup, the application and the cache share the same hardware resources, such as CPU, memory, and network interfaces.
