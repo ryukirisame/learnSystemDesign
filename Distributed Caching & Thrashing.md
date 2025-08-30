@@ -30,9 +30,25 @@ To make the system more reliable, some distributed caches replicate data across 
 #### 4. Sharding
 Dataset is split into smaller and manageable pieces called shards. Each shard is stored on different cache node. It helps distribute the data evenly and allows the cache to scale horizontally.
 
+# Dedicated Cache Servers vs Co-located Cache
+Where should the cache live? That's what we are going to see now.
+
+## 1. Dedicated Cache Servers
+
+<img width="1456" height="1054" alt="image" src="https://github.com/user-attachments/assets/534bb746-4f26-47ce-8530-5e4ae1c68f52" />
+
+- Dedicated cache servers are standalone machines or virtual instances used only for caching.
+- They are separate from the application servers and are optimized for caching.
+- So basically, there will be a cluster of nodes which will store only cache data.
+- This cluster of cache is shared across all the application servers. So, all the application servers will see the same cache data. (Data Consistency)
+- This approach is highly scalable. Just add or remove one node from the cluster.
+- If lets say Application Server A fails, the cache can still be accessible by other application servers unlike in the case of Co-located cache.
+- Since a network call needs to be made to access the cache, so slighly slower than Co-located cache.
+- High cost, since we need dedicated servers.
+- Ex: Redis, Memcached
 
 
-## Data Distribution Strategies
+# Data Distribution Strategies
 ### Consistent Hashing 
 - The most common approach where keys are mapped to nodes using a hash function. 
 - When nodes are added or removed, only a small portion of data needs to be redistributed. This minimizes cache invalidation during scaling operations.
@@ -44,6 +60,25 @@ Dataset is split into smaller and manageable pieces called shards. Each shard is
 ### Range-based Partitioning
 - Data is distributed based on key ranges assigned to different nodes.
 - This works well when you can predict access patterns but can lead to hotspots.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Thrashing
