@@ -89,7 +89,7 @@ Where should the cache live? That's what we are going to see now.
     - Different servers return different answers for the same user.
     - Data is inconsistent across caches.
 - So the core problem is: When the source of truth (DB) changes, how do we make sure all copies of that data in different caches are invalidated and updated.
-- One solution is to use Sticky Sessions: A user always gets routed to the same Server. But this strategy has its own challenges.
+- One solution is to use Sticky Sessions: A user always gets routed to the same Server. But this strategy has its own challenges like what if some users are more active than other? In that case one server will get more load than others.
 - With dedicated cache servers, this wouldn’t happen:
     - The cache cluster stores an item once. (Not considering any replicas here)
     - All application servers see the same data. 
