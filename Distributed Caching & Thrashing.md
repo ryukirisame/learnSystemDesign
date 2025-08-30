@@ -63,7 +63,7 @@ Where should the cache live? That's what we are going to see now.
 - The cache and the application use the same server resources like CPU memory, and I/O. This can slow things down under high load, if both demand significant resources.
 - Ex: Caffeine, Guava 
 
-### Data Fragmentation Issue
+### Data Fragmentation Issue in Co-located Cache
 
 - Example: E-commerce site with 3 app servers (A, B, C)
 - Now users browse products:
@@ -74,6 +74,23 @@ Where should the cache live? That's what we are going to see now.
     - Product 101 exists in 3 separate caches (A, B, C).
     - That’s 3× memory usage for the same data.
 - With dedicated cache servers, this duplication wouldn’t happen: Product 101 would live in cache once, and all app servers would reuse it.
+
+### Data Sync Problem in Co-located Cache
+
+- Example: Social media site with 2 app servers (A, B)
+- User accesses profile via Server A -> Server A caches: `user:123 → { name: "Alice" }`.
+- User updates their name via Server B:
+    -  Server B updates the DB: `name = "Alicia"`.
+    -  Server B may also update its own cache → now it has `{ name: "Alicia" }`.
+    -  But Server A’s cache still says `{ name: "Alice" }`.
+- Next request comes to Server A:
+    - Server A serves data from its local cache → user still sees `{ name: "Alice" }` (stale).
+- End result:
+    - Different servers return different answers for the same user.
+    - Data is inconsistent across caches.
+- With dedicated cache servers, this wouldn’t happen:
+    - The cache cluster stores an item once. 
+    - All application servers see the same data. 
 
 
 If you need your system to handle a lot of users, keep resources separate, and have the budget for it, using dedicated cache servers is likely the better option.
