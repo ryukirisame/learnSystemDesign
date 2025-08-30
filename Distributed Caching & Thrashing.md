@@ -111,6 +111,12 @@ But if your app is smaller, you want to save money, or need it to be super fast,
 - Reduces load on distributed cache.
 - Complexity increases — cache invalidation, coherence, and memory management are harder.
 
+
+# How Does Distributed Caching Work?
+To get data from the cache, application provides the key to the client library. The client library uses this key to find and query the node which has the data. If the data is present (a cache hit), it’s returned to the application. If not (a cache miss), the data is fetched from the primary data store (e.g., a database), and it can be cached for future use.
+
+
+
 # Data Distribution Strategies
 ### Consistent Hashing 
 - The most common approach where keys are mapped to nodes using a hash function. 
@@ -123,11 +129,6 @@ But if your app is smaller, you want to save money, or need it to be super fast,
 ### Range-based Partitioning
 - Data is distributed based on key ranges assigned to different nodes.
 - This works well when you can predict access patterns but can lead to hotspots.
-
-
-# How Does Distributed Caching Work?
-To get data from the cache, application provides the key to the client library. The client library uses this key to find and query the node which has the data. If the data is present (a cache hit), it’s returned to the application. If not (a cache miss), the data is fetched from the primary data store (e.g., a database), and it can be cached for future use.
-
 
 
 
