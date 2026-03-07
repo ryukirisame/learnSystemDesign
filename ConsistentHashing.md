@@ -16,7 +16,7 @@
 #### Solution
 - To mitigate the problems listed above, we use virtual nodes.
 - Virtual nodes are nodes that refer to actual nodes.
-- We place multiple virtual nodes for the same server on the ring. The more the virtual nodes, the more balanced the distribution of keys among the servers. 
+- We place multiple virtual nodes for the same server across the ring. The more the virtual nodes, the more balanced the distribution of keys among the servers. 
 
 ### Implementation
 
