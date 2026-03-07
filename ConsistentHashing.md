@@ -11,7 +11,7 @@
 #### The problems:
 1. Chain of failures: If server B fails, all the traffic of B will go to C. C will not be handle twice the traffic now and it will fail. Now, all the traffic from B, C and D will go to D. D will also fail. And so on...like a chain of failures/cascading effect.
 2. If the hashing function places nodes un-evenly on the ring, some servers will take less load, while some will have more load.
-3. If nodes are added or removed from the node, the partition/hash space of some servers will be too large, or too small. 
+3. If nodes are added or removed from the node, the partition/hash space of some servers will become too large, or too small. 
 
 #### Solution
 - To mitigate the problems listed above, we use virtual nodes.
