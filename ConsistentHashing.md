@@ -3,8 +3,20 @@
 - For this to work, it is important that the data is also distributed uniformly.
 - Consistent hashing is a common technique to achieve this goal.
 
+# Propblems with Naive Consistent Hashing (without Virtual Nodes)
+#### Naive Consisten Hashing assumes the following:
+1. The hash function is good enough to distribute node evenly across the ring. i.e., the nodes are placed on the ring at equal distances.
+2. Servers have equal capacity.
 
+#### The problems:
+1. Chain of failures: If server B fails, all the traffic of B will go to C. C will not be handle twice the traffic now and it will fail. Now, all the traffic from B, C and D will go to D. D will also fail. And so on...like a chain of failures/cascading effect.
+2. If the hashing function places nodes un-evenly on the ring, some servers will take less load, while some will have more load.
+3. If nodes are added or removed from the node, the partition/hash space of some servers will be too large, or too small. 
 
+#### Solution
+- To mitigate the problems listed above, we use virtual nodes.
+- Virtual nodes are nodes that refer to actual nodes.
+- We place multiple virtual nodes for the same server on the ring. The more the virtual nodes, the more balanced the distribution of keys among the servers. 
 
 ### Implementation
 
