@@ -3,7 +3,7 @@
 - For this to work, it is important that the data is also distributed uniformly.
 - Consistent hashing is a common technique to achieve this goal.
 
-# Propblems with Naive Consistent Hashing (without Virtual Nodes)
+# Problems with Naive Consistent Hashing (without Virtual Nodes)
 #### Naive Consisten Hashing assumes the following:
 1. The hash function is good enough to distribute node evenly across the ring. i.e., the nodes are placed on the ring at equal distances.
 2. Servers have equal capacity.
