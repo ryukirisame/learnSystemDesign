@@ -5,7 +5,7 @@
 
 # Problems with Naive Consistent Hashing (without Virtual Nodes)
 #### Naive Consisten Hashing assumes the following:
-1. The hash function is good enough to distribute node evenly across the ring. i.e., the nodes are placed on the ring at equal distances.
+1. The hash function is good enough to distribute node evenly across the ring. i.e., the nodes are placed on the ring at equal distances (equal partition of hash space).
 2. Servers have equal capacity.
 
 #### The problems:
