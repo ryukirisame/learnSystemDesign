@@ -4,11 +4,6 @@
 - [GeoHash Explorer](https://geohash.softeng.co/)
 
 # Geohashing
-Geohashing is a favorite topic in **system design interviews** when the system involves **location queries** (Uber, Swiggy, nearby restaurants, ride matching, etc.). If you understand the idea deeply, you can explain **how large-scale geo queries are implemented efficiently**.
-
-I'll teach it the way interviewers expect: **concept → intuition → algorithm → properties → interview use cases**.
-
----
 
 # 1. The Problem Geohash Solves
 
