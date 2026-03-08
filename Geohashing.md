@@ -172,7 +172,7 @@ Check:
 -5.6 > -90
 ```
 
-Bit = **1**
+Bit = **1** (because we chose the right region of the search space)
 
 Range:
 
