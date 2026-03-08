@@ -91,4 +91,4 @@ class ConsistentHashing<T> {
 }
 ```
 
-- Note:  Consisten hashing doesn't eliminate redistribution of data among servers upon horizontal scaling, it minimizes it.
+- Note:  Consistent hashing doesn't eliminate redistribution of data among servers upon horizontal scaling, it minimizes it.
