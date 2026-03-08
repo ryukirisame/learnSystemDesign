@@ -1,4 +1,4 @@
-# Resources
+### Resources
 - Alex Yu book
 - [Youtube](https://www.youtube.com/watch?v=IC5Y1EE-aj4) 
 
