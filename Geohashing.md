@@ -129,7 +129,9 @@ Lon = -5.6
 ---
 
 # 5. Step 2 — Encode Longitude (Binary Search)
-
+- If we go left during search: bit -> 0
+- If we go right during search: bit -> 1
+  
 Start with:
 
 ```
@@ -148,7 +150,7 @@ Check:
 -5.6 < 0
 ```
 
-So bit = **0**
+So bit = **0** (because we chose the left region of the search space)
 
 New range:
 
