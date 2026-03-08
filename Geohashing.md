@@ -559,5 +559,3 @@ Good concise explanation:
 ---
 
 
-
-Those are the parts that **really impress interviewers**.
