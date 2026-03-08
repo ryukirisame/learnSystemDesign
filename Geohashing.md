@@ -138,7 +138,7 @@ Start with:
 Longitude range = [-180, 180]
 ```
 
-Midpoint:
+Midpoint of -180 and 180:
 
 ```
 0
