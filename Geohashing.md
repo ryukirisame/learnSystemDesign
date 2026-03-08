@@ -144,13 +144,12 @@ Midpoint:
 0
 ```
 
-Check:
+Check where does longitude lie, on the left side or the right side of 0?
 
 ```
 -5.6 < 0
 ```
-
-So bit = **0** (because we chose the left region of the search space)
+-5.6 lies on the left side of 0, So bit = **0** (because we chose the left region of the search space)
 
 New range:
 
@@ -166,13 +165,12 @@ Next midpoint:
 -90
 ```
 
-Check:
+Check where does -5.6 lies, on the left side or right side of midpoint (-90)?
 
 ```
 -5.6 > -90
 ```
-
-Bit = **1** (because we chose the right region of the search space)
+-5.6 is larger than -90, so it lies on the right side of midpoint. So, Bit = **1** (because we chose the right region of the search space)
 
 Range:
 
