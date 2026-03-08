@@ -5,7 +5,7 @@
 
 # Geohashing
 
-# 1. The Problem Geohash Solves
+## 1. The Problem Geohash Solves
 
 Imagine we store millions of locations:
 
@@ -42,7 +42,7 @@ This is exactly what **Geohash** does.
 
 ---
 
-# 2. What is Geohash?
+## 2. What is Geohash?
 
 **Geohash = encode latitude + longitude into a short string**
 
@@ -86,7 +86,7 @@ HashMap<GeohashPrefix, List<Location>>
 
 ---
 
-# 3. Key Idea Behind Geohash
+## 3. Key Idea Behind Geohash
 
 Geohash works by **recursively dividing the earth into grids**.
 
@@ -105,7 +105,7 @@ These bits become the **geohash string**.
 
 ---
 
-# 4. Step 1 — Start With Coordinate Ranges
+## 4. Step 1 — Start With Coordinate Ranges
 
 Latitude range:
 
@@ -128,7 +128,7 @@ Lon = -5.6
 
 ---
 
-# 5. Step 2 — Encode Longitude (Binary Search)
+## 5. Step 2 — Encode Longitude (Binary Search)
 - If we go left during search: bit -> 0
 - If we go right during search: bit -> 1
   
@@ -206,7 +206,7 @@ This is **binary search on longitude**.
 
 ---
 
-# 6. Step 3 — Encode Latitude
+## 6. Step 3 — Encode Latitude
 
 Latitude range:
 
@@ -260,7 +260,7 @@ Continue.
 
 ---
 
-# 7. Step 4 — Interleave Bits
+## 7. Step 4 — Interleave Bits
 
 We don't keep lat and lon separately.
 
@@ -287,7 +287,7 @@ This creates **one binary number**.
 
 ---
 
-# 8. Step 5 — Convert to Base32
+## 8. Step 5 — Convert to Base32
 
 Geohash does not store raw binary.
 
@@ -315,7 +315,7 @@ Each character adds **more precision**.
 
 ---
 
-# 9. Precision of Geohash
+## 9. Precision of Geohash
 
 Longer geohash = smaller grid.
 
@@ -339,7 +339,7 @@ All points inside that square share the prefix.
 
 ---
 
-# 10. Why Geohash Is Powerful
+## 10. Why Geohash Is Powerful
 
 Because **prefix matching = spatial locality**
 
@@ -371,7 +371,7 @@ This is **very fast with indexes**.
 
 ---
 
-# 11. Handling "Nearby Search"
+## 11. Handling "Nearby Search"
 
 Problem:
 
@@ -418,7 +418,7 @@ Total ≈ **9 cells**.
 
 ---
 
-# 12. Example System Design (Uber)
+## 12. Example System Design (Uber)
 
 Drivers stored like:
 
@@ -446,7 +446,7 @@ User requests ride:
 
 ---
 
-# 13. Complexity
+## 13. Complexity
 
 Without geohash:
 
@@ -470,7 +470,7 @@ Usually **very small**.
 
 ---
 
-# 14. Limitations (Important for Interviews)
+## 14. Limitations (Important for Interviews)
 
 ### 1. Edge Problem
 
@@ -510,7 +510,7 @@ So systems dynamically adjust precision.
 
 ---
 
-# 15. Where Geohash Is Used
+## 15. Where Geohash Is Used
 
 ### Ride matching
 
@@ -530,9 +530,8 @@ MongoDB / Redis GEO
 
 ---
 
-# 16. Geohash vs QuadTree
+## 16. Geohash vs QuadTree
 
-You asked this earlier, so here's the **interview difference**:
 
 | Feature        | Geohash           | QuadTree       |
 | -------------- | ----------------- | -------------- |
@@ -550,7 +549,7 @@ QuadTree → algorithms / graphics
 
 ---
 
-# 17. Interview One-Line Explanation
+## 17. Interview One-Line Explanation
 
 Good concise explanation:
 
@@ -559,9 +558,9 @@ Good concise explanation:
 ---
 
 
-# Precion level
+# GeoHash Precision
 
-# 1. What Precision Means in Geohash
+## What Precision Means in Geohash
 
 Precision = **number of characters in the geohash string**
 
@@ -588,7 +587,7 @@ more characters → smaller cell → higher precision
 
 ---
 
-# 2. Geohash Precision Table
+## Geohash Precision Table
 
 These are the **commonly used levels** interviewers expect you to know.
 
@@ -613,7 +612,7 @@ precision 5–7
 
 ---
 
-# 3. Example
+## Example
 
 Take Bangalore coordinates:
 
@@ -648,7 +647,7 @@ tdr1v9h    → ~150 m area
 
 ---
 
-# 4. Why Systems Choose Precision Carefully
+## Why Systems Choose Precision Carefully
 
 If precision is **too small**:
 
@@ -697,7 +696,7 @@ Example:
 
 ---
 
-# 5. Why Width and Height Differ
+## Why Width and Height Differ
 
 Geohash cells are not perfect squares.
 
@@ -719,7 +718,7 @@ So the grid stretches slightly.
 
 ---
 
-# 6. Typical Precision Used in Real Systems
+## Typical Precision Used in Real Systems
 
 Examples:
 
@@ -743,7 +742,7 @@ precision = 5
 
 ---
 
-# 7. Interview Answer (Concise)
+## Interview Answer (Concise)
 
 If asked:
 
@@ -755,23 +754,12 @@ Good answer:
 
 ---
 
-If you're preparing seriously for **system design interviews**, the **next concept that connects directly with precision** is:
-
-**Bounding boxes in geohashing** — how systems compute the exact area a geohash covers.
-
-That concept is often used in **Uber / Swiggy / nearby search system design questions**.
 
 
+## **How do you choose geohash precision for a given search radius?**
 
-Good. This is the **next thing interviewers almost always ask after neighbors**:
 
-> **How do you choose geohash precision for a given search radius?**
-
-If you answer this well, it shows you understand the **practical use of geohash in real systems**, not just the theory.
-
----
-
-# 1. The Core Problem
+### 1. The Core Problem
 
 Geohash creates **grid cells**.
 
@@ -799,7 +787,7 @@ If we choose the wrong one, performance suffers.
 
 ---
 
-# 2. If Precision Is Too Small (Bad)
+### 2. If Precision Is Too Small (Bad)
 
 Example:
 
@@ -831,7 +819,7 @@ Bad performance.
 
 ---
 
-# 3. If Precision Is Too Large (Also Bad)
+### 3. If Precision Is Too Large (Also Bad)
 
 Example:
 
@@ -854,7 +842,7 @@ That also hurts performance.
 
 ---
 
-# 4. Ideal Precision
+### 4. Ideal Precision
 
 The rule is:
 
@@ -867,7 +855,7 @@ That way:
 
 ---
 
-# 5. Common Precision Table
+### 5. Common Precision Table
 
 This is the table most engineers memorize.
 
@@ -892,7 +880,7 @@ Important ones for interviews:
 
 ---
 
-# 6. Example (Uber Style)
+### 6. Example (Uber Style)
 
 User wants:
 
@@ -930,7 +918,7 @@ Then filter exact distance.
 
 ---
 
-# 7. Another Example
+### 7. Another Example
 
 User query:
 
@@ -954,7 +942,7 @@ So nearby cells cover enough area.
 
 ---
 
-# 8. Typical Mapping Used in Systems
+### 8. Typical Mapping Used in Systems
 
 Real systems often do something like:
 
@@ -969,7 +957,7 @@ This keeps queries efficient.
 
 ---
 
-# 9. What the System Actually Does
+### 9. What the System Actually Does
 
 Example query:
 
@@ -979,7 +967,7 @@ Find drivers within 2km
 
 System flow:
 
-### Step 1
+#### Step 1
 
 Compute user geohash.
 
@@ -987,9 +975,7 @@ Compute user geohash.
 tdr1v
 ```
 
----
-
-### Step 2
+#### Step 2
 
 Choose precision.
 
@@ -997,9 +983,7 @@ Choose precision.
 5
 ```
 
----
-
-### Step 3
+#### Step 3
 
 Find neighbors.
 
@@ -1018,9 +1002,8 @@ Total:
 9 cells
 ```
 
----
 
-### Step 4
+#### Step 4
 
 Query DB
 
@@ -1030,17 +1013,16 @@ FROM drivers
 WHERE geohash IN (...)
 ```
 
----
 
-### Step 5
+#### Step 5
 
 Filter by exact distance.
 
 Using **Haversine distance**.
 
----
 
-# 10. Why Exact Distance Is Still Needed
+
+### 10. Why Exact Distance Is Still Needed
 
 Geohash cells are **squares**.
 
@@ -1064,9 +1046,8 @@ So final step:
 distance(driver, user) <= radius
 ```
 
----
 
-# 11. Important Interview Insight
+### 11. Important Interview Insight
 
 Good engineers mention this optimization:
 
@@ -1087,7 +1068,7 @@ This is often done in **Redis GEO** or **MongoDB geo indexing**.
 
 ---
 
-# 12. Clean Interview Answer
+### 12. Clean Interview Answer
 
 If interviewer asks:
 
@@ -1097,7 +1078,7 @@ Answer:
 
 > The geohash precision determines the grid cell size. We choose a precision where the cell size is close to the search radius. For example, precision 5 corresponds to roughly 5km cells, precision 6 to around 1km, and precision 7 to about 150 meters. This ensures we retrieve nearby candidates efficiently while minimizing unnecessary results. After fetching candidates from the center and neighboring cells, we filter them using exact distance calculations.
 
-That answer is **interview-ready**.
+
 
 
 
