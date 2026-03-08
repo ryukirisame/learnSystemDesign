@@ -559,3 +559,545 @@ Good concise explanation:
 ---
 
 
+# Precion level
+
+# 1. What Precision Means in Geohash
+
+Precision = **number of characters in the geohash string**
+
+Example:
+
+```
+tdr
+tdr1
+tdr1v
+tdr1v9
+```
+
+Each additional character:
+
+* divides the space further
+* makes the cell **smaller**
+* increases location **accuracy**
+
+So:
+
+```
+more characters → smaller cell → higher precision
+```
+
+---
+
+# 2. Geohash Precision Table
+
+These are the **commonly used levels** interviewers expect you to know.
+
+| Length | Cell Width | Cell Height | Typical Use   |
+| ------ | ---------- | ----------- | ------------- |
+| 1      | ~5000 km   | ~5000 km    | continent     |
+| 2      | ~1250 km   | ~625 km     | large country |
+| 3      | ~156 km    | ~156 km     | region        |
+| 4      | ~39 km     | ~19.5 km    | city          |
+| 5      | ~4.9 km    | ~4.9 km     | neighborhood  |
+| 6      | ~1.2 km    | ~0.6 km     | small area    |
+| 7      | ~150 m     | ~150 m      | street        |
+| 8      | ~38 m      | ~19 m       | building      |
+| 9      | ~4.8 m     | ~4.8 m      | house         |
+| 10     | ~1.2 m     | ~0.6 m      | room-level    |
+
+Most real systems use:
+
+```
+precision 5–7
+```
+
+---
+
+# 3. Example
+
+Take Bangalore coordinates:
+
+```
+Latitude: 12.9716
+Longitude: 77.5946
+```
+
+Different precision levels:
+
+```
+t
+td
+tdr
+tdr1
+tdr1v
+tdr1v9
+tdr1v9h
+```
+
+Each step zooms into a **smaller geographic area**.
+
+Example:
+
+```
+tdr        → ~150 km region
+tdr1       → ~40 km area
+tdr1v      → ~5 km area
+tdr1v9     → ~1 km area
+tdr1v9h    → ~150 m area
+```
+
+---
+
+# 4. Why Systems Choose Precision Carefully
+
+If precision is **too small**:
+
+```
+cell size = 150 km
+```
+
+Query:
+
+```
+find drivers within 3 km
+```
+
+You will retrieve **thousands of drivers**.
+
+Bad performance.
+
+---
+
+If precision is **too large**:
+
+```
+cell size = 40 meters
+```
+
+Now a 3 km search requires **hundreds of geohash cells**.
+
+Also bad.
+
+---
+
+So systems pick a precision where:
+
+```
+cell size ≈ search radius
+```
+
+Example:
+
+| Search Radius | Geohash Precision |
+| ------------- | ----------------- |
+| 20 km         | 4                 |
+| 5 km          | 5                 |
+| 1 km          | 6                 |
+| 200 m         | 7                 |
+
+---
+
+# 5. Why Width and Height Differ
+
+Geohash cells are not perfect squares.
+
+Example:
+
+```
+precision 6
+width  ≈ 1.2 km
+height ≈ 0.6 km
+```
+
+This happens because:
+
+```
+longitude and latitude bits alternate
+```
+
+So the grid stretches slightly.
+
+---
+
+# 6. Typical Precision Used in Real Systems
+
+Examples:
+
+**Ride sharing (Uber / Ola)**
+
+```
+precision = 6
+```
+
+**Restaurant search**
+
+```
+precision = 6 or 7
+```
+
+**Geo analytics**
+
+```
+precision = 5
+```
+
+---
+
+# 7. Interview Answer (Concise)
+
+If asked:
+
+**“What are geohash precision levels?”**
+
+Good answer:
+
+> Geohash precision refers to the number of characters in the geohash string. Each additional character divides the geographic grid further, increasing spatial resolution. For example, precision 5 represents about a 5 km area, precision 6 about 1 km, and precision 7 about 150 meters. Systems choose precision based on the search radius to balance query efficiency and accuracy.
+
+---
+
+If you're preparing seriously for **system design interviews**, the **next concept that connects directly with precision** is:
+
+**Bounding boxes in geohashing** — how systems compute the exact area a geohash covers.
+
+That concept is often used in **Uber / Swiggy / nearby search system design questions**.
+
+
+
+Good. This is the **next thing interviewers almost always ask after neighbors**:
+
+> **How do you choose geohash precision for a given search radius?**
+
+If you answer this well, it shows you understand the **practical use of geohash in real systems**, not just the theory.
+
+---
+
+# 1. The Core Problem
+
+Geohash creates **grid cells**.
+
+Example:
+
+```
+precision = 5 → cell ≈ 5km × 5km
+precision = 6 → cell ≈ 1.2km × 0.6km
+precision = 7 → cell ≈ 150m × 150m
+```
+
+But user queries are usually:
+
+```
+Find drivers within 3 km
+Find restaurants within 2 km
+Find users within 500 m
+```
+
+So the question becomes:
+
+> **Which geohash length should we use for that radius?**
+
+If we choose the wrong one, performance suffers.
+
+---
+
+# 2. If Precision Is Too Small (Bad)
+
+Example:
+
+```
+radius = 2km
+precision = 3
+```
+
+Cell size:
+
+```
+~150km
+```
+
+That means the DB query returns **huge numbers of results**.
+
+Example:
+
+```
+SELECT * FROM drivers
+WHERE geohash LIKE 'tdr%'
+```
+
+Maybe **50,000 drivers** come back.
+
+Then the system must filter them all.
+
+Bad performance.
+
+---
+
+# 3. If Precision Is Too Large (Also Bad)
+
+Example:
+
+```
+radius = 5km
+precision = 8
+```
+
+Cell size:
+
+```
+~40 meters
+```
+
+Your 5km radius now spans **thousands of cells**.
+
+You must query **many geohashes**.
+
+That also hurts performance.
+
+---
+
+# 4. Ideal Precision
+
+The rule is:
+
+> Choose a geohash cell size **close to the search radius**.
+
+That way:
+
+* few DB queries
+* few extra results
+
+---
+
+# 5. Common Precision Table
+
+This is the table most engineers memorize.
+
+| Length | Cell Width | Cell Height |
+| ------ | ---------- | ----------- |
+| 1      | 5000 km    | 5000 km     |
+| 2      | 1250 km    | 625 km      |
+| 3      | 156 km     | 156 km      |
+| 4      | 39 km      | 19.5 km     |
+| 5      | 4.9 km     | 4.9 km      |
+| 6      | 1.2 km     | 0.6 km      |
+| 7      | 150 m      | 150 m       |
+| 8      | 38 m       | 19 m        |
+
+Important ones for interviews:
+
+```
+5 → ~5km
+6 → ~1km
+7 → ~150m
+```
+
+---
+
+# 6. Example (Uber Style)
+
+User wants:
+
+```
+drivers within 3km
+```
+
+Choose:
+
+```
+precision = 5
+```
+
+Because cell ≈ **5km**.
+
+Then search:
+
+```
+center + 8 neighbors
+```
+
+Total cells:
+
+```
+9
+```
+
+This covers roughly:
+
+```
+~15km × 15km
+```
+
+Then filter exact distance.
+
+---
+
+# 7. Another Example
+
+User query:
+
+```
+restaurants within 500m
+```
+
+Use:
+
+```
+precision = 6
+```
+
+Cell size:
+
+```
+~1km
+```
+
+So nearby cells cover enough area.
+
+---
+
+# 8. Typical Mapping Used in Systems
+
+Real systems often do something like:
+
+```
+if radius > 2500m → precision 5
+if radius > 600m  → precision 6
+if radius > 75m   → precision 7
+else              → precision 8
+```
+
+This keeps queries efficient.
+
+---
+
+# 9. What the System Actually Does
+
+Example query:
+
+```
+Find drivers within 2km
+```
+
+System flow:
+
+### Step 1
+
+Compute user geohash.
+
+```
+tdr1v
+```
+
+---
+
+### Step 2
+
+Choose precision.
+
+```
+5
+```
+
+---
+
+### Step 3
+
+Find neighbors.
+
+```
+tdr1v
+tdr1u
+tdr1t
+tdr1w
+tdr1x
+...
+```
+
+Total:
+
+```
+9 cells
+```
+
+---
+
+### Step 4
+
+Query DB
+
+```
+SELECT * 
+FROM drivers
+WHERE geohash IN (...)
+```
+
+---
+
+### Step 5
+
+Filter by exact distance.
+
+Using **Haversine distance**.
+
+---
+
+# 10. Why Exact Distance Is Still Needed
+
+Geohash cells are **squares**.
+
+But search area is **circle**.
+
+Example:
+
+```
++---------+
+|         |
+|   ( )   |
+|         |
++---------+
+```
+
+Points in corners of square may be outside the circle.
+
+So final step:
+
+```
+distance(driver, user) <= radius
+```
+
+---
+
+# 11. Important Interview Insight
+
+Good engineers mention this optimization:
+
+> **Store multiple geohash precisions**
+
+Example DB schema:
+
+```
+driver_id
+geohash_5
+geohash_6
+geohash_7
+```
+
+Then queries can use the correct index.
+
+This is often done in **Redis GEO** or **MongoDB geo indexing**.
+
+---
+
+# 12. Clean Interview Answer
+
+If interviewer asks:
+
+> How do you choose geohash precision?
+
+Answer:
+
+> The geohash precision determines the grid cell size. We choose a precision where the cell size is close to the search radius. For example, precision 5 corresponds to roughly 5km cells, precision 6 to around 1km, and precision 7 to about 150 meters. This ensures we retrieve nearby candidates efficiently while minimizing unnecessary results. After fetching candidates from the center and neighboring cells, we filter them using exact distance calculations.
+
+That answer is **interview-ready**.
+
+
+
