@@ -6,12 +6,6 @@
 
 
 # Roadmap 1:
-A solid grasp of system design is what separates a junior developer from a senior engineer or architect. It’s less about memorizing specific frameworks and more about understanding **trade-offs**—knowing when to choose consistency over availability, or horizontal scaling over vertical scaling.
-
-Here is a comprehensive, step-by-step roadmap to mastering system design, broken down from foundational concepts to advanced architecture.
-
----
-
 ## Phase 1: The Absolute Foundations
 
 Before building massive distributed networks, you need to understand how data moves and how basic servers handle load.
@@ -25,10 +19,6 @@ Before building massive distributed networks, you need to understand how data mo
 * **Load Balancing:** Distributing incoming network traffic across multiple servers.
 * *Algorithms:* Round Robin, Least Connections, IP Hash.
 * *Layers:* Layer 4 (Transport layer, TCP/UDP) vs. Layer 7 (Application layer, HTTP/HTTPS).
-
-
-
----
 
 ## Phase 2: Client-Server Communication & APIs
 
@@ -45,10 +35,6 @@ How do different parts of your system talk to each other?
 * **Server-Sent Events (SSE):** One-way real-time streaming from server to client.
 * **Long Polling:** The client repeatedly requests data from the server, holding the connection open until new data is available.
 
-
-
----
-
 ## Phase 3: Data Storage & Management
 
 Choosing the right database and data layer layout is often the most critical decision in a system design interview or project.
@@ -62,15 +48,11 @@ Choosing the right database and data layer layout is often the most critical dec
 * *Wide-Column (Cassandra, ScyllaDB):* Massive write throughput, great for time-series or analytics.
 * *Graph (Neo4j):* Excellent for highly interconnected data (social networks, fraud detection).
 
-
-
 ### 2. Scaling the Data Layer
 
 * **Replication:** Copying data across multiple nodes (Leader-Follower or Leaderless) to ensure high availability and read scalability.
 * **Sharding (Horizontal Partitioning):** Breaking a large database into smaller, faster, more manageable pieces (shards) based on a shard key.
 * **Indexes:** How databases speed up read queries (B-Trees, LSM Trees), and the trade-off of slower writes.
-
----
 
 ## Phase 4: Performance & Scalability Design Patterns
 
@@ -88,7 +70,6 @@ How do you make a system fast and resilient when millions of users hit it at onc
 
 * **CDN (Content Delivery Network):** Geographically distributed groups of servers that cache static content (images, video, HTML) closer to the user to reduce latency.
 
----
 
 ## Phase 5: Advanced Distributed Systems Concepts
 
@@ -102,9 +83,6 @@ When you reach massive scale, normal networking rules break down. You need to ha
 * **Rate Limiting:** Protecting your servers from being overwhelmed or subjected to DDoS attacks.
 * *Algorithms:* Token Bucket, Leaky Bucket, Fixed Window, Sliding Window.
 
-
-
----
 
 ## Phase 6: Observability, Security, & Resilience
 
