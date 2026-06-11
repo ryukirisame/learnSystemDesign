@@ -1,0 +1,24 @@
+# Distributed Locking
+
+## Without Locking
+- Lets suppose we have a movie ticket reservation platform. There is only one last seat available: seat-5.
+- We have two users A & B who want to book a seat. They both fetch available seats. Both of them see seat-5 is the last remaining seat.
+- Both the users hit "Book" button simulataneously. A's request went through Node 1 and B's request went via Node 2.
+- Node 1 checks if the seat is available or not. Currently its available, so it proceeds with booking seat-5. Payments etc.
+- Meanwhile, Node 2 also does the same. It checks if the seat is available - finds it to be available. Proceeds with the payment and marks the seat as booked.
+- Two Nodes marked the same seat as Booked.
+- This is the problem.
+
+We need a way to make sure that only **one** node can proceed with booking a particular seat at a time. This can be done with Distributed locks.
+- Distributed locking is a mechanism through which we allow only one node to work on a shared resource at a time. Read operation is fine. Write operation is not. 
+
+## With Distributed Lock
+Let's try the same scenario with distributed locks.
+
+- We have the last remaining seat: seat-5.
+- A & B both try to book the seat simultaneously.
+- Node 1 received A's request and Node 2 received B's request.
+- Both node will now race to acquire a lock on seat-5.
+- Let's suppose Node 1 won. Node 1 will now proceed with payment. Node 2 is the loser. So it will fail the booking and tell the user that someone else is booking that particular seat.
+- Node 1 succeeds with payment and marks the seat as Booked.
+- User B will not be able to get the seat. No payment was done by User B. No double booking here.
