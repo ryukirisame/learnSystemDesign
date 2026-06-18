@@ -1,7 +1,11 @@
+
+# Optimizing Network Calls for Low Latency
+- Let's suppose that we have our application server which talks to another server or database or redis. Each time a request comes, the application server talks to that another server via opening a new TCP connection. This opening (and closing) of TCP connection becomes a bottleneck at a large scale. Even though Redis is fast, our DB is fast, the network call to them becomes an area of bottleneck. 
+- So how do we optimize network calls?
+  - Well one way would be to make sure that our application server always connects to the geographically closest database/redis server.
+  - TCP connection pooling. 
+
 # TCP Connection Pooling
-
-- Let's suppose that we have our application server which talks to another fast server or database or redis. Each time a request comes, the application server talks to the fast server via opening a new TCP connection. This opening (and closing) of TCP connection becomes a bottleneck at a large scale. Even though Redis is fast, our DB is fast, the network call to them becomes an area of bottleneck. 
-
 - How does TCP connection work?
   - We have a 3-way handshake first before any bit of data can be sent. This 3-Way handshake takes time.
   - If the database or server uses encrypted connection (HTTPS/TLS), then on top of the 3-way handshake, it requires TLS handshake as well.  
