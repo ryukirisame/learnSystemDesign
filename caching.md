@@ -185,6 +185,12 @@ A cache stampede happens when a popular cached item expires (or is missing), and
     - With randomized expiry: Each item expires at 60 ± random(0–10s) → some expire at 55s, some at 63s, some at 68s.
 - Effect: Expirations are spread out over time, hence preventing simultaneous recomputations.
 
+# Cache Penetration
+- A client requests for nonexistent data. Every request will miss from cache and hit the DB.
+
+## Solutions
+- Null Caching: If DB returns null data, cache null with short TTL.
+- Bloom Filters.
 
 # Caching Strategies
 
