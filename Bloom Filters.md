@@ -126,6 +126,59 @@ Filter 0 (full, frozen) -> Filter 1 (full, frozen) -> Filter 2 (currently active
 - If you try to delete "Bob" by flipping bits 5 and 8 back to 0, you accidentally delete part of "Alice" too (since she relies on bit 5). To handle deletions, you would need a more complex variant called a Counting Bloom Filter, which uses numbers instead of raw binary bits.
 
 
+# Counting Bloom Filter
+- To address the biggest limitation of standard bloom filters - not able to delete elements, we have counting bloom filters.
+- Here, instead of 1-bit slots, which can only store 0 or 1, we have slots of counters.
+- Each counter is typically of 3 or 4-bits. So, each slot can store from 0 upto 15 in case of 4 bits and upto 7 in case of 3 bits.
+- If the counter is 0, that means no element is mapped to it.
+- If a counter is 3, that means exactly three elements currently map to that slot.
+- Insertion: To insert an element, simply pass the element to $k$ hash functions which will give us the slot numbers. Then simply increase the counters of those slots.
+- Query: Pass the element through the hash functions, if all the slots says 0, the element does not exist. If even one slot counter is greater 1, then the element probably exists.
+- Deletion: Pass the element through the hash functions, go the slots, decrease the counters by 1.
+
+## Example
+- Array size (m): 5 slots
+- Hash functions (k): 2 (h1 and h2)
+- Counter Size: 3 bits per slot (meaning each slot can count from 0 upto 7).
+- Initial State (Empty Filter)
+
+```
+Index:    [ 0  1  2  3  4 ]
+Counter:  [ 0  0  0  0  0 ]
+```
+- Add user "Alpha"
+  - Pass Alpha to our hash functions.
+  - h1("Alpha") mod 5 = 1
+  - h2("Alpha") mod 5 = 3
+  - Increment the counters at slots 1 and 3
+```
+ Counter:  [ 0  1  0  1  0 ]
+                ^     ^
+```
+- Add user "Beta"
+  - h1("Beta") mod 5 = 3
+  - h2("Beta") mod 5 = 4
+  - Increment the counters at slot 3 and 4
+```
+Counter:  [ 0  1  0  2  1 ]
+                     ^  ^
+```
+- Delete User "Alpha"
+  - h1("Alpha") mod 5 = 1
+  - h2("Alpha") mod 5 = 3
+  - Decrement the counters at slots 1 and 3 by 1
+```
+ Counter:  [ 0  0  0  1  1 ]
+                v     v
+```
+- Query "Beta" (Verifying existence)
+  - h1("Beta") mod 5 = 3
+  - h2("Beta") mod 5 = 4
+  - Slots 3 and 4 counters are greater than 0, so, Beta probably exists. The deletion of "Alpha" didn't break our ability to look up "Beta".
+
+
+
+
 
 
      
