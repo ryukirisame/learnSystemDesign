@@ -133,7 +133,7 @@ Filter 0 (full, frozen) -> Filter 1 (full, frozen) -> Filter 2 (currently active
 - If the counter is 0, that means no element is mapped to it.
 - If a counter is 3, that means exactly three elements currently map to that slot.
 - Insertion: To insert an element, simply pass the element to $k$ hash functions which will give us the slot numbers. Then simply increase the counters of those slots.
-- Query: Pass the element through the hash functions, if all the slots says 0, the element does not exist. If even one slot counter is greater 1, then the element probably exists.
+- Query: Pass the element through the hash functions, if any of the slots says 0, the element does not exist. If all slot counter is greater than 0, then the element probably exists.
 - Deletion: Pass the element through the hash functions, go the slots, decrease the counters by 1.
 
 ## Example
@@ -189,11 +189,18 @@ Counter:  [ 0  1  0  2  1 ]
 
 ### Bit Packing
 - You might be thinking: How can we have an array of 4-bits sized slots?
-- Well, we would use bit packing. The idea is to to use a standard Byte array. Each byte is of 8 bits. Logically we will divide the 8-bits into two 4-bits slots.
-- To find the first half (leftmost) 4-bit counter, simply do right shift 4 times, and we would get the value of first half. In some programming languages, if we do right shift, instead of 0s on the left, we might end up with 1's due to sign bits. In order to avoid that, we would perform AND operation with '00001111' to drop the initial 1's just to be safe. 
-- To find the second half (rightmost) 4-bit counter, we could perform AND operation of the 8-bits by '00001111'.
-- If we want to find the slot, lets suppose slot 2:
-  - We will divide the slot number by 2 and get ceil of that. This will give us the array index. Why 2? because each index is logically split into 2 parts. So dividing the logical index by 2, will give us the actual array index.
+- Well, we would use bit packing. The idea is to to use a standard Byte array. Each byte is of 8 bits. Logically we will divide the 8-bits into two 4-bit slots.
+```
+Byte layout (1 byte = 2 counters):
+
+   Byte 0        Byte 1        Byte 2
+ [XXXX][YYYY]  [XXXX][YYYY]  [XXXX][YYYY]
+  slot0 slot1   slot2 slot3   slot4 slot5
+```
+- To find the first half (leftmost) 4-bit counter, simply do right shift 4 times, and we would get the value of first half. In some programming languages, if we do right shift, instead of 0s on the left, we might end up with 1's due to sign bits. In order to avoid that, we would perform AND operation with '00001111' to drop the initial 1's just to be safe. `(current_byte >> 4) & '00001111'`
+- To find the second half (rightmost) 4-bit counter, we could perform AND operation of the 8-bits by '00001111'. `current_byte & '00001111'`
+- If we want to find the slot in our bloom filter array, lets suppose slot 2:
+  - We will divide the slot number by 2 and get floor of that. This will give us the array index. Why 2? because each index is logically split into 2 parts. So dividing the logical index/slot by 2, will give us the actual array index.
   - Then, we can check whether the slot number is even or odd. If its even, the slot is on the leftmost side of the byte. If its odd, the slot is on the rightmost side of the byte.
 
 
