@@ -177,9 +177,24 @@ Counter:  [ 0  1  0  2  1 ]
   - Slots 3 and 4 counters are greater than 0, so, Beta probably exists. The deletion of "Alpha" didn't break our ability to look up "Beta".
 
 ## Counter Overflow
-- Since we are using 4-bit slots, which can store only upto 15, once the counter reaches 15, our counter will overflow.
+- Since we are using 4-bit slots, which can store only upto 15, once the counter reaches 15, our counter will overflow. That means we cannot store more elements that maps to that slot.
 - We may think, just use 32-bits slots. Well, we could. But that would take a lot of space. Remember why we were using bloom filters in first place? To conserve space.
-- Standard Bloom Filter (1 bit/slot) 
+- Let's calculate memory required:
+  - Standard Bloom Filter (1 bit/slot) = O(m)
+  - Counter Bloom Filter (4 bit/slot) = 4x standard bloom filter
+  - 32-bit counter bloom filter (32 bit/slot) = 32x standard bloom filter
+  - That's a lot of memory usage just for delete functionality. 
+- The solution is this: When a slot counter reaches its maximum value (15 in this case), we would freeze that slot. For insertions that maps to that slot, they will not increase that slot's counter. For deletions that maps to that slot, we will not decrease that slot's counter. The slot counter will remain 15 at all times from now.
+- Now, that means, we cannot actually delete an element that maps to that slot. That's perfectly okay. Remember the guarantee of bloom filter? True Negative - If the bloom filter says the element does not exist, then it must not exist in the system at all cost. Since, we have frozen our slot to the max value 15, any element that maps to that slot will always be "Probably exists". Which is okay, false positives are fine. But it will never happen that an element that maps to that slot actually exists, but the bloom filter says it does not exist. So, the property of bloom filter is still preserved with frozen counter. We will lose some delete functionality though.
+
+### Bit Packing
+- You might be thinking: How can we have an array of 4-bits sized slots?
+- Well, we would use bit packing. The idea is to to use a standard Byte array. Each byte is of 8 bits. Logically we will divide the 8-bits into two 4-bits slots.
+- To find the first half (leftmost) 4-bit counter, simply do right shift 4 times, and we would get the value of first half. In some programming languages, if we do right shift, instead of 0s on the left, we might end up with 1's due to sign bits. In order to avoid that, we would perform AND operation with '00001111' to drop the initial 1's just to be safe. 
+- To find the second half (rightmost) 4-bit counter, we could perform AND operation of the 8-bits by '00001111'.
+- If we want to find the slot, lets suppose slot 2:
+  - We will divide the slot number by 2 and get ceil of that. This will give us the array index. Why 2? because each index is logically split into 2 parts. So dividing the logical index by 2, will give us the actual array index.
+  - Then, we can check whether the slot number is even or odd. If its even, the slot is on the leftmost side of the byte. If its odd, the slot is on the rightmost side of the byte.
 
 
 
