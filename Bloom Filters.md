@@ -19,13 +19,14 @@
 - It always tells one of the two things:
   - "Definitely not": The definitely 100% does not exist in the dataset.
   - "Probably yes": Means, the element may or may not exist in the dataset.
-- Bloom Filters may give you false positives: Bloom filters may say the data exists, but in reality it does not. This is fine for many use-cases.
+- Bloom Filters may give you false positives: Bloom filters may say the data exists, but in reality it does not. In that case, we will have to very with backend if the data actually exists or not.
 - Bloom Filter will never give you false negatives: Bloom filters will never say the element does not exist which actually exists in the system. This is a guarantee provided by bloom filters.
+- Bloom filter works like a fast reject filter.
 
 ## Working
 There are two most important components in bloom filters:
 1. Bit Array: A fixed size array of 1-bit. So, each index can store either 0 or 1. We could also call each indices as buckets/slots. Initally each bit is set to 0.
-2. Hash Functions: A set of $k$ independent has functions. Every hash function takes the same input and gives a position/bucket no./slot no. in the bit array.
+2. Hash Functions: A set of $k$ independent hash functions. Every hash function takes the same input and gives a position/bucket no./slot no. in the bit array. Independent so that we have less collision between the hash functions. 
 
 ### Adding an element to bloom filter
 - Feed the element into each of the $k$ hash functions.
@@ -97,6 +98,22 @@ Bits:  [ 0  0  1  0  0  1  0  0  1  0 ]
   - $m$: The size of the bit array.
   - $k$: The number of hash functions.
 - If your bit array is too small ($m$ is low) or you insert too many items ($n$ is high), the array fills up with 1s, and the false positive rate skyrockets toward 100%. Software engineers use specific mathematical formulas to calculate the optimal size of $m$ and $k$ based on their acceptable false-positive tolerance (e.g., 1%).
+
+### Scalable Bloom Filter
+- We don't know number of elements 'n' in advance. (Instagram never knows how many people will sign up in future). And since our bloom filter is of fixed size, a time will come when it will fill up.
+- So how do we tackle this problem? We need a bloom filter that is scalable as number of elements grow.
+- Scalable Bloom Filter: We use a multi-level/chained bloom filters.
+- Each time our latest bloom filter fills up (or reaches a certain number of bit sets), we add a new bloom filter at the end of the chain.
+- Insert operation: Once a filter is "full" (hit its target fill ratio), it's **frozen** — you stop inserting into it entirely. All new inserts go only into the newest filter in the chain. 
+```
+Filter 0 (full, frozen) -> Filter 1 (full, frozen) -> Filter 2 (currently active)
+                                                         ↑
+                                                new inserts go ONLY here
+```
+- Query operation:
+  - Query all filters one by one, if all the filters say the element does not exist, then only we say the element does not exist. i.e., check filter 0, if it says "not present" (some bit is 0), check filter 1, and so on. Only if all filters independently say "not present" do you conclude the element definitely does not exist.
+  - If any one filter says "present" (all its k bits are set), you immediately return "probably present" — you don't need the others to agree.
+
 
 ## Real World Applications
 - Because Bloom filters are incredibly fast ($O(k)$ time complexity for both inserts and lookups) and use a fraction of the memory a Hash Set would require, they are widely used in massive scale systems.
