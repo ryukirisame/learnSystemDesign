@@ -176,7 +176,10 @@ Counter:  [ 0  1  0  2  1 ]
   - h2("Beta") mod 5 = 4
   - Slots 3 and 4 counters are greater than 0, so, Beta probably exists. The deletion of "Alpha" didn't break our ability to look up "Beta".
 
-
+## Counter Overflow
+- Since we are using 4-bit slots, which can store only upto 15, once the counter reaches 15, our counter will overflow.
+- We may think, just use 32-bits slots. Well, we could. But that would take a lot of space. Remember why we were using bloom filters in first place? To conserve space.
+- Standard Bloom Filter (1 bit/slot) 
 
 
 
