@@ -248,16 +248,14 @@ graph TD
 
 
 
+
+
 # B-Tree Deletion Step-by-Step Notes (Order $m = 5$)
 
-These digital notes document the B-tree deletion cases, scenarios, and resolution strategies from your study guide[cite: 2].
-
----
-
 ## 1. Core Configuration & Structural Rules
-Based on an **Order ($m$) = 5** B-tree, the following mathematical parameters apply to every node[cite: 2]:
+Based on an **Order ($m$) = 5** B-tree, the following mathematical parameters apply to every node:
 *   **Max Keys Allowed:** $m - 1 = 4$ keys[cite: 2]
-*   **Min Keys Allowed:** $\lceil m/2 \rceil - 1 = \lceil 5/2 \rceil - 1 = 2$ keys (except the root)[cite: 2]
+*   **Min Keys Allowed:** $\lceil m/2 \rceil - 1 = \lceil 5/2 \rceil - 1 = 2$ keys (except the root)
 
 ---
 
