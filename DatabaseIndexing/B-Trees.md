@@ -241,3 +241,207 @@ graph TD
     IntR --> Leaf5
 
 ```
+
+
+
+
+
+
+
+# B-Tree Deletion Step-by-Step Notes (Order $m = 5$)
+
+These digital notes document the B-tree deletion cases, scenarios, and resolution strategies from your study guide[cite: 2].
+
+---
+
+## 1. Core Configuration & Structural Rules
+Based on an **Order ($m$) = 5** B-tree, the following mathematical parameters apply to every node[cite: 2]:
+*   **Max Keys Allowed:** $m - 1 = 4$ keys[cite: 2]
+*   **Min Keys Allowed:** $\lceil m/2 \rceil - 1 = \lceil 5/2 \rceil - 1 = 2$ keys (except the root)[cite: 2]
+
+---
+
+## Case 1: The Key to be Deleted is in a Leaf Node
+
+### Scenario 1: Leaf Node Has Extra Keys (More than Minimum)
+If the leaf node containing the target key has more than the minimum number of keys allowed (more than 2), simply delete the key[cite: 2]. No structural rebalancing is required[cite: 2].
+
+#### Example: Delete 39
+*   **Before:** The target leaf node `[38, 39, 40]` contains 3 keys, which is above the minimum limit of 2[cite: 2].
+
+```mermaid
+graph TD
+    Parent["[ 42 | 48 ]"]
+    Leaf1["[ 38 | 39 | 40 ]"]
+    Leaf2["[ 44 | 45 | 46 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+
+```
+
+* **After Deletion:** Removing 39 leaves the node with `[38, 40]`. Since it still satisfies the minimum requirement of 2 keys, the tree remains valid.
+
+
+
+```mermaid
+graph TD
+    Parent["[ 42 | 48 ]"]
+    Leaf1["[ 38 | 40 ]"]
+    Leaf2["[ 44 | 45 | 46 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+
+```
+
+---
+
+### Scenario 2: Leaf Node is at Minimum Capacity (Borrowing from Siblings)
+
+If deleting a key causes the node to fall below the minimum capacity (fewer than 2 keys), look at the immediate left or right sibling. If a sibling has extra keys, borrow one via a parent rotation/swap.
+
+#### Example: Delete 16
+
+* **Before:** The target leaf node is `[16, 18]`. Both siblings have extra keys (`[10, 12, 14]` and `[21, 22, 24]`).
+
+
+
+```mermaid
+graph TD
+    Parent["[ 9 | 15 | 20 ]"]
+    Leaf1["[ 10 | 12 | 14 ]"]
+    Leaf2["[ 16 | 18 ]"]
+    Leaf3["[ 21 | 22 | 24 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+    Parent --> Leaf3
+
+```
+
+* **Rotation Execution:** Deleting 16 leaves the node deficient with just `[18]`. Deciding to borrow from the right sibling, take its smallest key (**21**) and swap it into the parent separator position, pulling the old parent separator (**20**) down into the deficient leaf.
+
+
+* **After Deletion:** The separator is updated correctly, and all nodes satisfy the minimum key requirements.
+
+
+
+```mermaid
+graph TD
+    Parent["[ 9 | 15 | 21 ]"]
+    Leaf1["[ 10 | 12 | 14 ]"]
+    Leaf2["[ 18 | 20 ]"]
+    Leaf3["[ 22 | 24 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+    Parent --> Leaf3
+
+```
+
+---
+
+### Scenario 3: Leaf Node and Siblings are all at Minimum Capacity (Merging Nodes)
+
+When a node underflows upon deletion and none of its immediate siblings have extra keys to lend, borrowing is impossible. The deficient node must be merged with a sibling and their shared parent separator key.
+
+#### Example: Delete 22
+
+* **Before:** The target node is `[22, 24]`. Its left sibling `[18, 20]` is at the absolute minimum of 2 keys and cannot spare any.
+
+
+
+```mermaid
+graph TD
+    Parent["[ 9 | 15 | 21 ]"]
+    Leaf1["[ 10 | 12 | 14 ]"]
+    Leaf2["[ 18 | 20 ]"]
+    Leaf3["[ 22 | 24 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+    Parent --> Leaf3
+
+```
+
+* **Merge Execution:** Deleting 22 leaves the node with just `[24]`. Combine the current node `[24]`, its sibling `[18, 20]`, and the parent separator **21** into a single combined node.
+
+
+* **After Deletion:** The elements combine into `[18, 20, 21, 24]`.
+
+
+> **Note on Safety:** $(\text{Minimum keys: } 2) + (\text{Underflowed keys: } 1) + (\text{Parent key: } 1) = 4\text{ keys}$. This matches the maximum limit ($m-1 = 4$), ensuring the merged node will never overflow.
+> 
+> 
+
+
+
+```mermaid
+graph TD
+    Parent["[ 9 | 15 ]"]
+    Leaf1["[ 10 | 12 | 14 ]"]
+    Leaf2["[ 18 | 20 | 21 | 24 ]"]
+    
+    Parent --> Leaf1
+    Parent --> Leaf2
+
+```
+
+(Note: If pulling the separator down leaves the parent node with less than the minimum number of keys, apply this same merging technique recursively upwards.)
+
+---
+
+## Case 2: The Key to be Deleted is in an Internal Node
+
+You cannot directly erase a key from an internal node because it acts as a routing separator for its left and right subtrees. It must be replaced by a valid new separator:
+
+1. The **largest value in its left subtree** (Inorder Predecessor), **OR**
+2. The **smallest value in its right subtree** (Inorder Successor).
+
+
+
+#### Example: Delete 28
+
+* **Before:** Key 28 is located inside an internal node and divides the subtrees `[26, 27]` and `[30, 32]`.
+
+
+
+```mermaid
+graph TD
+    Parent["[ 25 | 36 ]"]
+    Internal["[ 28 | 33 ]"]
+    Leaf1["[ 26 | 27 ]"]
+    Leaf2["[ 30 | 32 ]"]
+    
+    Parent --> Internal
+    Internal --> Leaf1
+    Internal --> Leaf2
+
+```
+
+* **Substitution Execution:** Choose the smallest value in the right subtree (**30**) to replace 28.
+
+
+* **After Deletion State:** Key 30 is moved up into the internal node. However, this leaves the bottom leaf node with only a single key `[32]`, which violates the minimum key constraint. To finish balancing the tree, you now apply the standard leaf level underflow mechanics (borrowing or merging) to fix `[32]`.
+
+
+
+```mermaid
+graph TD
+    Parent["[ 25 | 36 ]"]
+    Internal["[ 30 | 33 ]"]
+    Leaf1["[ 26 | 27 ]"]
+    Leaf2["[ 32 ]"]
+    
+    style Leaf2 fill:#ffcccc,stroke:#ff0000
+    
+    Parent --> Internal
+    Internal --> Leaf1
+    Internal --> Leaf2
+
+```
+
+```
+
+```
