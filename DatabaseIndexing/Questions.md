@@ -6,8 +6,8 @@
 - Second, if we go with BST, the height of the tree would be more. So, number of node reads would be more. That would mean, more number of block reads.
 - In a B-Tree, a node contains large number of keys so that a single node occupies as much space as possible of a single block. Ideally, the node should fit perfectly in a block. So, with just one block read, we are reading hundreds/thousands of keys at once. So, the number of block reads would be a lot less.
 
-### The Power of Fan-Out (shorted trees)
-- The maximum number of children coming out from a single node is called fan-out (denoted as M). A binary tree has a strict fan-out of 2. A binary tree can have a fan-out of hundreds or thousands.
+### The Power of Fan-Out (shorter trees)
+- The maximum number of children coming out from a single node is called fan-out (denoted as M). A binary tree has a strict fan-out of 2. A B-tree can have a fan-out of hundreds or thousands.
 - So, the larger the number of keys in a node of B-Tree, the more the children. The more children means shorter tree height compared to BST. Hence, a larger fan-out means shorter tree height.
 - With a fan-out of 2, the BST can only double its capacity at each level: $2^{l}$.
 - With a fan-out of 100, the B-tree multiplies its capacity by 100 at each level: $100^l$
@@ -23,4 +23,4 @@
 
 ### Balancing
 - Usually, we go with auto-incremented primary key. 1,2,3,4,... so on. If we decide to use BST to store this, we might end up with right skewed BST. Which will basically turn into a linked list.
-- B-tree is self-balancing. It builds the tree bottom-to-up. Every leaf node is at the same level. 
+- B-tree is self-balancing. Balance is made via splitting a node and push the median upwards. It builds the tree bottom-to-up. Every leaf node is at the same level. 
