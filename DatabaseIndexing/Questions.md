@@ -7,8 +7,10 @@
 - In a B-Tree, a node contains large number of keys so that a single node occupies as much space as possible of a single block. Ideally, the node should fit perfectly in a block. So, with just one block read, we are reading hundreds/thousands of keys at once. So, the number of block reads would be a lot less.
 
 ### The Power of Fan-Out (shorted trees)
-- The number of children coming out from a single node is called fan-out (denoted as M). A binary tree has a rigid fan-out of 2. A binary tree can have a fan-out of hundreds or thousands.
+- The maximum number of children coming out from a single node is called fan-out (denoted as M). A binary tree has a strict fan-out of 2. A binary tree can have a fan-out of hundreds or thousands.
 - So, the larger the number of keys in a node of B-Tree, the more the children. The more children means shorter tree height compared to BST. Hence, a larger fan-out means shorter tree height.
+- With a fan-out of 2, the BST can only double its capacity at each level: $2^{l}$.
+- With a fan-out of 100, the B-tree multiplies its capacity by 100 at each level: $100^l$
 - Because of large fan-out of B-trees, it spreads horizontally a lot, so, the tree height remains shorter than BST.
 - Lets suppose we are storing 1 million rows
   - Balanced BST: $\log_2(1,000,000) \approx 20$ levels deep.
