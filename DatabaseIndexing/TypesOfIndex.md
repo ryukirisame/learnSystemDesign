@@ -26,7 +26,7 @@
 
 # Covering Indexes 
 - This index helps us avoid the double lookup problem that we had in secondary indexes.
-- So, the idea is: If the query only needs those columns that are already present in the secondary index itself, database can skip traversing the clustered index entirely. This type of index is called covering index.
+- So, the idea is: If the query only needs those columns that are already present in the secondary index itself, database can skip traversing the clustered index entirely. This type of index is called covering index. This execution plan is called an Index-Only Scan.
 - ```sql
   -- Index: (email)
   -- Query needs only 'id' (which is embedded as the PK reference) and 'email'
@@ -74,6 +74,14 @@ CREATE INDEX idx_email_status ON users(email, status);
 -  The leaf node already contains `id`.
 -  So, now our index contains `email`, `status` and `id`, which are required for the query. So, this index is now a covering index for this query.
 
+- Column order matters - the leftmost prefix rule
+  - A composite index `(a,b,c)` means the keys in a node are sorted first by `a`, then by `b` within each `a`, then by `c` within each `b`. So, we can use the index efficiently only for:
+    - WHERE a = ?
+    - WHERE a = ? AND b = ?
+    - WHERE a = ? AND b = ? AND c = ?
+    - WHERE a = ? AND b > ?
+  - We cannot use the index for `WHERE b = ?` alone, or `WHERE c=?` alone. The index can't skip the leading column(s).
+
 #### Option 2: Index with `INCLUDE` (PostgreSQL, SQL Server, MySQL 8.0+)
 ```sql
 CREATE INDEX idx_email_inc_status ON users(email) INCLUDE (status);
@@ -81,4 +89,12 @@ CREATE INDEX idx_email_inc_status ON users(email) INCLUDE (status);
 - Each node of the B+ tree of the index contains only `email` as the key.
 - `status` only contains in the leaf nodes together with `id` as extra payload.
 -  Advantage is that non-leaf nodes will require less storage for keys and hence we will be able to fit more keys into a single node/block, and hence our tree will branch out more, so the height of the tree will reduce and hence it will mean less block reads.
--  
+
+## Why not make every index covering?
+- Write Overhead: With every `INSERT`/`UPDATE`/`DELETE` on a covered column will mean that we must update in the index's B+ tree as well. More columns covered means more maintenance work.
+- For composite indexes, each key will take more space, hence the number of keys in a node will reduce, hence fan-out will reduce, hence height will reduce, hence more disk reads.
+- For indexes with `INCLUDE`, there will be more payload to carry on each leaf node, so more storage.
+- In both the strategy, the storage will be high. And hence, when we load data into memory, memory usage will be high.
+- We should use covering indexes for read-heavy, frequently run queries (eg hot APIs).
+- Rule of Thumb: Use standard secondary indexes by default. Upgrade an index to a covering index only for hot, high-frequency queries that show up as bottlenecks in your database execution plans.
+
