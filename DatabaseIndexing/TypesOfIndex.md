@@ -82,17 +82,19 @@ CREATE INDEX idx_email_status ON users(email, status);
     - WHERE a = ? AND b > ?
   - We cannot use the index for `WHERE b = ?` alone, or `WHERE c=?` alone. The index can't skip the leading column(s).
 
-#### Option 2: Index with `INCLUDE` (PostgreSQL, SQL Server, MySQL 8.0+)
+#### Option 2: Index with `INCLUDE` (PostgreSQL, SQL Server)
 ```sql
 CREATE INDEX idx_email_inc_status ON users(email) INCLUDE (status);
 ```
 - Each node of the B+ tree of the index contains only `email` as the key.
 - `status` only contains in the leaf nodes together with `id` as extra payload.
 -  Advantage is that non-leaf nodes will require less storage for keys and hence we will be able to fit more keys into a single node/block, and hence our tree will branch out more, so the height of the tree will reduce and hence it will mean less block reads.
+- MySQL (even MySQL 8.0 / 8.4) does NOT support the INCLUDE clause. The only way to create a covering index is by using a Composite Index.
+- The INCLUDE clause is supported in PostgreSQL (v11+), MS SQL Server, and DB2.
 
 ## Why not make every index covering?
 - Write Overhead: With every `INSERT`/`UPDATE`/`DELETE` on a covered column will mean that we must update in the index's B+ tree as well. More columns covered means more maintenance work.
-- For composite indexes, each key will take more space, hence the number of keys in a node will reduce, hence fan-out will reduce, hence height will reduce, hence more disk reads.
+- For composite indexes, each key will take more space, hence the number of keys in a node will reduce, hence fan-out will reduce, hence height of the tree will increase, hence more disk reads.
 - For indexes with `INCLUDE`, there will be more payload to carry on each leaf node, so more storage.
 - In both the strategy, the storage will be high. And hence, when we load data into memory, memory usage will be high.
 - We should use covering indexes for read-heavy, frequently run queries (eg hot APIs).
