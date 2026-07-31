@@ -9,7 +9,9 @@
   - If neither exists, InnoDB silently generates a hidden 6-byte `ROW_ID` and clusters on that.
 - Why "clustered"?
   - Because records with adjacent key values are physically stored next to each other on the disk. So its like all the adjacent records form a cluster, and are not scattered.
-  
+- While MySQL (InnoDB) structures tables around a Clustered Index (Index-Organized Table), PostgreSQL uses a Heap Table architecture.
+- 
+ 
 # Secondary (Non-Clustered) Indexes 
 - Let's suppose that we fire a query that searches for a record not by primary key but by some other column. For example: searching a user by name instead of user_id. For this query, the clustered index cannot help us. And hence the database would have to scan the entire table to search for the users with that name. This would be very costly.
 - To prevent this, we create a Secondary Index: `CREATE INDEX idx_name ON users(name)`;
@@ -99,4 +101,11 @@ CREATE INDEX idx_email_inc_status ON users(email) INCLUDE (status);
 - In both the strategy, the storage will be high. And hence, when we load data into memory, memory usage will be high.
 - We should use covering indexes for read-heavy, frequently run queries (eg hot APIs).
 - Rule of Thumb: Use standard secondary indexes by default. Upgrade an index to a covering index only for hot, high-frequency queries that show up as bottlenecks in your database execution plans.
+
+# Primary Index
+- Sometimes confused with clustered index.
+- It means an index on primary key.
+- In InnoDB(MySQL), Primary Index = Clustered Index
+- In PostgreSQL, Primary Index!=Clustered Index
+
 
