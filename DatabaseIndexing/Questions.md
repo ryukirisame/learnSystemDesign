@@ -38,7 +38,7 @@
 - If you query `SELECT * FROM users ORDER BY age`, sorting millions of rows in RAM is incredibly expensive.
 - However, if a **covering** index exists on `age`, the database completely skips sorting. Because the B+ Tree leaf nodes are already physically sorted on disk, the database simply starts at the leftmost leaf node and reads straight across.
 - This is true only when we are selecting columns that are all in the index. In case of sorting by PK, clustered index will be used. In case of sorting by non-PK column, we need a covering index to sort efficiently.
-- In PostgreSQL, the table data is stored on heap file. So, the database still has to go to heap file. For large result sets, postgres may choose to ignore the index entirely for sorting and just sort in memory.
+- In PostgreSQL, the table data is stored on heap file. So, the database still has to go to heap file. For large result sets, postgres may choose to ignore the index entirely for sorting and just do sequential heap file scan + sort in memory.
 
 
 
