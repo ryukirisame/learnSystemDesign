@@ -52,4 +52,19 @@ SELECT * FROM users WHERE name LIKE 'Jo%';
   - Then reads across the leaf nodes horizontally using the linked list - just like range scans.
   - The database stops when it hits a key that no longer starts with `Jo`.
 - Prefix scans definitely have an advantage of the index. But middle and suffix scans doesn't have that. They can't use the B+ tree index. 
-- 
+
+## Why do databases prefer B+ trees instead of classic B-trees?
+- In classic B-trees, every node - both internal and leaf - can store actual data. So, if we are doing point lookup, we find the key in an internal node, get the data and we are done.
+- In B+ tree, internal nodes only store keys. They are used for navigation purpose only. All actual data lives in the leaf nodes. The leaf nodes are also linked together as a linked list.
+  
+#### 1. Internal nodes can fit more keys in B+ trees
+- Since internal nodes in B+ tree store only keys (no data), they are small. This means, we can fit a lot more keys in a single node. Which means the tree will widen more and its height will be shorter. This directly translates to lesser block reads.
+
+#### 2. Range scans are massively better in B+ trees
+- Since the leaf nodes are linked, we can easily do a range scan in B+ trees.
+- In B-trees, we will need to traverse up and down multiple times.
+
+#### 3. Better cache and disk efficiency
+- Since internal nodes of B+ trees are light, we can easily fit the internal nodes in memory as cache. They also work as index. So, it will be blazing fast to query the index.
+- In classic B trees, internal nodes also contain data. So, it would be difficult to cache them in memory. 
+
