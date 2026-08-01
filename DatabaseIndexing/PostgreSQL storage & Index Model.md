@@ -32,3 +32,28 @@
   -  In cases where our query doesn't have a covering index, and row scatter is severe, database will choose to skip the first step entirely and perform linear scan on the table file. This will be cheaper.
 
 
+# MVCC (Multi-Version Concurrency Control)
+- Imagine theres a reader and a writer, both wanting to operate on the same row at the same time.
+  - Reader: `SELECT * FROM orders WHERE id = 5` — takes a few milliseconds to run
+  - Writer: `UPDATE orders SET status = 'shipped' WHERE id = 5` — happens mid-way through the read
+
+- If we allow both of them to work on the same row, the reader might see corrupted data.
+- One solution would be: locking the row. The writer will obtain a lock on the row, the reader will wait. This will work, but performance might suffer a lot in a busy database.
+- The idea of MVCC is to keep multiple versions of the same row. When a writer updates a row, it doesn't overwrite the old one - it creates a new version alongside it.
+- Any reader which started before the writer, simply reads the old version. Any reader that started after the writer was done (after COMMIT), reads the new version - because by this time, the `ctid` of the row would be updated to the new version - so naturally new readers will end up routed to the new version.
+- This allows a reader and writer to access the same record without blocking each other.
+
+## How it works
+When we run `UPDATE`:
+- Instead of updating the old row, database will create a new row entirely.
+- It will mark the old row as expired.
+- The old row is not deleted yet - it will stay on the disk.
+- Because old versions are never immediately deleted, we will have dead tuples accumulating over time.
+- PostgreSQL solves this with a background process called VACUUM, which scans the heap file, identifies expired rows that are not in use by any transaction, and deletes it. 
+- 
+
+
+
+
+
+
