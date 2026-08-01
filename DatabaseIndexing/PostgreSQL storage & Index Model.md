@@ -17,7 +17,7 @@
 ### MVCC(Multi-Version Concurrency Control)
 - When we update a row, the writer doesn't make changes to the old row. Instead, it creates a new version of the row and writes it to the file. The old version is marked as expired. It is not deleted immediately. Later, through a background process, it is deleted to claim space.
 - The advantage of this is writers do not block readers. and vice versa. Since locking is expensive and complex, this design gets rid of locking and provides concurrent access to the same record by a reader and writer both.
-- In databases that use clustered indexing, writers will have to lock readers if they want to work on the same record.
+- In databases that use clustered indexing - like MySQL InnoDB, they also have MVCC. Storing data in a heap makes implementing MVCC much simpler and cheaper, because new row versions can land anywhere in the heap. In a clustered index, inserting a new row version in sorted order is structurally harder and more expensive.
 
 ## `CLUSTER` command
 - If we want to physically order the heap pages to match an index, we can use this command. This will sort the pages of the file according to a specific index.
@@ -40,7 +40,7 @@
 - If we allow both of them to work on the same row, the reader might see corrupted data.
 - One solution would be: locking the row. The writer will obtain a lock on the row, the reader will wait. This will work, but performance might suffer a lot in a busy database.
 - The idea of MVCC is to keep multiple versions of the same row. When a writer updates a row, it doesn't overwrite the old one - it creates a new version alongside it.
-- Any reader which started before the writer, simply reads the old version. Any reader that started after the writer was done (after COMMIT), reads the new version - because by this time, the `ctid` of the row would be updated to the new version - so naturally new readers will end up routed to the new version.
+- Any reader which started before the writer, simply reads the old version. Any reader that started after the writer was done (after COMMIT), reads the new version.
 - This allows a reader and writer to access the same record without blocking each other.
 
 ## How it works
