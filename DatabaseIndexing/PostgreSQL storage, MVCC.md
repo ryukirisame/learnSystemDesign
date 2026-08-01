@@ -44,7 +44,7 @@ Table "orders" on disk
 ├── Page 3  [ row, row, row, empty, empty ]
 └── ...
 ```
-- Each page will be 8KB (Well, this depends on the block size). In our case, one page can fit 5 table rows.
+- Each page will be 8KB by default. In our case, one page can fit 5 table rows.
 
 
 # MVCC (Multi-Version Concurrency Control) in PostgreSQL
@@ -64,9 +64,9 @@ When we run `UPDATE`:
 - It will mark the old row as expired.
 - The old row is not deleted yet - it will stay on the disk.
 - Because old versions are never immediately deleted, we will have dead tuples accumulating over time.
-- PostgreSQL solves this with a background process called `VACUUM`, which scans the heap file, identifies expired rows that are not in use by any transaction, and deletes it. 
-
-
+- PostgreSQL solves this with a background process called `VACUUM`, which scans the heap file, identifies expired rows that are not in use by any transaction, and marks that space as reusable - This does not shrink the file size though. The space stays with the file.
+- In order to truly reclaim space - we need to run `VACUUM FULL` command. This will rewrite the entire table into a new file, compacting and shrinking the file size. The only problem is, it will lock the table for a while. So, this is not recommended on a live busy table.
+- In short: the file grows as data grows, but only explicitly shrinks with VACUUM FULL. Normal VACUUM just reclaims space for reuse internally.
 
 
 # MVCC in InnoDB (Multi-Version Concurrency Control)
