@@ -40,7 +40,16 @@
 - This is true only when we are selecting columns that are all in the index. In case of sorting by PK, clustered index will be used. In case of sorting by non-PK column, we need a covering index to sort efficiently.
 - In PostgreSQL, the table data is stored on heap file. So, the database still has to go to heap file. For large result sets, postgres may choose to ignore the index entirely for sorting and just do sequential heap file scan + sort in memory.
 
-
-
-
-
+### Prefix Scans
+- A prefix search is when you search for all values that start with a given string.
+```sql
+SELECT * FROM users WHERE name LIKE 'Jo%';
+```
+- If we have an index on column `name`, the index tree will store the keys lexicographically sorted.
+- Since the keys are sorted, we can easily find out which keys in the B+ tree node start with `Jo`, and include that in result set.
+- This is essentially a range scan across nodes:
+  - The database finds the first key which has `Jo` in it.
+  - Then reads across the leaf nodes horizontally using the linked list - just like range scans.
+  - The database stops when it hits a key that no longer starts with `Jo`.
+- Prefix scans definitely have an advantage of the index. But middle and suffix scans doesn't have that. They can't use the B+ tree index. 
+- 
