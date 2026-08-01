@@ -24,3 +24,23 @@
 ### Balancing
 - Usually, we go with auto-incremented primary key. 1,2,3,4,... so on. If we decide to use BST to store this, we might end up with right skewed BST. Which will basically turn into a linked list.
 - B-tree is self-balancing. Balance is made via splitting a node and push the median upwards. It builds the tree bottom-to-up. Every leaf node is at the same level. 
+
+## How different queries map to the tree
+### Point Lookups (`WHERE id = 105`)
+- Easy. Just go through the tree and find the key.
+
+### Range Scans (`WHERE age BETWEEN 20 AND 30`)
+- Since B+ tree's leaf nodes are linked, so:
+  - The database just needs to reach the first leaf node containing the first range key (`20`)
+  - Once we reach the first leaf node, we can start reading horizontally across the leaf nodes using the linked list pointers. Once we find a key greater than `30`, we can stop.
+
+### Sorting (`ORDER BY age ASC`)
+- If you query `SELECT * FROM users ORDER BY age`, sorting millions of rows in RAM is incredibly expensive.
+- However, if a **covering** index exists on `age`, the database completely skips sorting. Because the B+ Tree leaf nodes are already physically sorted on disk, the database simply starts at the leftmost leaf node and reads straight across.
+- This is true only when we are selecting columns that are all in the index. In case of sorting by PK, clustered index will be used. In case of sorting by non-PK column, we need a covering index to sort efficiently.
+- In PostgreSQL, the table data is stored on heap file. So, the database still has to go to heap file. For large result sets, postgres may choose to ignore the index entirely for sorting and just sort in memory.
+
+
+
+
+
