@@ -238,3 +238,9 @@ This is simpler than Postgres's approach — in Postgres, dead row versions accu
 
 <img width="1472" height="440" alt="image" src="https://github.com/user-attachments/assets/d03f1e92-ce5d-4626-98d7-86f803622b0f" />
 
+
+# PostgreSQL vs InnoDB
+<img width="900"  alt="image" src="https://github.com/user-attachments/assets/f01a5c6c-331a-462e-96cf-f309a3608612" />
+
+
+
