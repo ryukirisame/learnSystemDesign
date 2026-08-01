@@ -49,10 +49,22 @@ When we run `UPDATE`:
 - It will mark the old row as expired.
 - The old row is not deleted yet - it will stay on the disk.
 - Because old versions are never immediately deleted, we will have dead tuples accumulating over time.
-- PostgreSQL solves this with a background process called VACUUM, which scans the heap file, identifies expired rows that are not in use by any transaction, and deletes it. 
-- 
+- PostgreSQL solves this with a background process called `VACUUM`, which scans the heap file, identifies expired rows that are not in use by any transaction, and deletes it. 
 
-
+# The Heap File
+- The heap is just a file where the actual table rows are stored. That's it.
+- A row is simply placed wherever there's a free space. 
+- Initially the file will be empty - no pages. PostgreSQL will add pages to it as we insert rows.
+- When all existing pages are full, postgres will extend the file by appending new page. 
+- Physically it will look something like this:
+```
+Table "orders" on disk
+├── Page 1  [ row, row, empty, row, row ]
+├── Page 2  [ row, empty, empty, row, row ]
+├── Page 3  [ row, row, row, empty, empty ]
+└── ...
+```
+- Each page will be 8KB (Well, this depends on the block size). In our case, one page can fit 5 table rows.
 
 
 
