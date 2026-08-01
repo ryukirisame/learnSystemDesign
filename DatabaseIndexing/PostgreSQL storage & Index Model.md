@@ -31,8 +31,23 @@
   -  For large ranges, we can go with covering indexes (index-only scans). This way, we will get the required data in the index itself. No need to access the table file.
   -  In cases where our query doesn't have a covering index, and row scatter is severe, database will choose to skip the first step entirely and perform linear scan on the table file. This will be cheaper.
 
+# The Heap File
+- The heap is just a file where the actual table rows are stored. That's it.
+- A row is simply placed wherever there's a free space. 
+- Initially the file will be empty - no pages. PostgreSQL will add pages to it as we insert rows.
+- When all existing pages are full, postgres will extend the file by appending new page. 
+- Physically it will look something like this:
+```
+Table "orders" on disk
+├── Page 1  [ row, row, empty, row, row ]
+├── Page 2  [ row, empty, empty, row, row ]
+├── Page 3  [ row, row, row, empty, empty ]
+└── ...
+```
+- Each page will be 8KB (Well, this depends on the block size). In our case, one page can fit 5 table rows.
 
-# MVCC (Multi-Version Concurrency Control)
+
+# MVCC (Multi-Version Concurrency Control) in PostgreSQL
 - Imagine theres a reader and a writer, both wanting to operate on the same row at the same time.
   - Reader: `SELECT * FROM orders WHERE id = 5` — takes a few milliseconds to run
   - Writer: `UPDATE orders SET status = 'shipped' WHERE id = 5` — happens mid-way through the read
@@ -51,21 +66,175 @@ When we run `UPDATE`:
 - Because old versions are never immediately deleted, we will have dead tuples accumulating over time.
 - PostgreSQL solves this with a background process called `VACUUM`, which scans the heap file, identifies expired rows that are not in use by any transaction, and deletes it. 
 
-# The Heap File
-- The heap is just a file where the actual table rows are stored. That's it.
-- A row is simply placed wherever there's a free space. 
-- Initially the file will be empty - no pages. PostgreSQL will add pages to it as we insert rows.
-- When all existing pages are full, postgres will extend the file by appending new page. 
-- Physically it will look something like this:
+
+
+
+# MVCC in InnoDB (Multi-Version Concurrency Control)
+
+## The Problem MVCC Solves
+
+Imagine two things happening at the same time on the same row:
+
+- **Alice (reader):** `SELECT * FROM orders WHERE id = 5`
+- **Bob (writer):** `UPDATE orders SET status = 'shipped' WHERE id = 5`
+
+If Bob overwrites the row while Alice is reading it, Alice might see corrupted, half-written data.
+
+The naive fix is **locking** — Bob locks the row, Alice waits. This works but kills performance in a busy database. Readers and writers are constantly blocking each other.
+
+**MVCC's idea:** instead of locking, keep multiple versions of the same row. Bob doesn't overwrite the old row — he creates a new version alongside it. Alice simply reads the old version. Nobody waits for anybody.
+
+
+## How InnoDB Implements MVCC
+
+InnoDB uses two things:
+
+- **Main file** — always contains the latest version of the row
+- **Undo log** — stores old versions of rows that have been updated
+
+When a writer updates a row:
+1. It copies the current row into the undo log (preserving the old version)
+2. It updates the main file with the new version
+3. It adds a pointer from the new version in the main file back to the old version in the undo log
+
+This chain of old versions is called the **version chain**.
+
+<img width="1472" height="250" alt="image" src="https://github.com/user-attachments/assets/18b03bd7-81f9-48d3-a5d4-9783ebe21853" />
+<img width="1472" height="250" alt="image" src="https://github.com/user-attachments/assets/ee04b39a-eb65-4ead-b530-f608ae003fe6" />
+
+
+
+## What is a Snapshot?
+
+When a transaction begins, the database hands it a **snapshot** — simply a number representing the latest committed transaction at that moment.
+
+The snapshot means: *"I only trust data created by transactions up to this number. Anything created after this is invisible to me."*
+
+**Example:** Transaction 11 starts when the latest commit was transaction 10. Its snapshot is 10. It will only read row versions created by transaction 10 or earlier.
+
+
+
+## Full Walkthrough Example
+
+### Starting state
+
 ```
-Table "orders" on disk
-├── Page 1  [ row, row, empty, row, row ]
-├── Page 2  [ row, empty, empty, row, row ]
-├── Page 3  [ row, row, row, empty, empty ]
-└── ...
+Main file:
+id=5  status='pending'  (created by txn 10)
+
+Undo log: empty
 ```
-- Each page will be 8KB (Well, this depends on the block size). In our case, one page can fit 5 table rows.
+
+### Step 1: Transaction 11 (reader) begins
+
+It receives snapshot = 10. It hasn't read anything yet — it just has this cutoff number in its pocket.
+
+### Step 2: Transaction 12 (writer) updates the row
+
+Before touching the main file, InnoDB saves the current row to the undo log:
+
+```
+Undo log:
+id=5  status='pending'  (created by txn 10)
+```
+
+Then it updates the main file:
+
+```
+Main file:
+id=5  status='shipped'  (created by txn 12)  ──ptr──▶  Undo log:
+                                                        id=5  status='pending'  (created by txn 10)
+```
+
+Transaction 12 commits.
+
+### Step 3: Transaction 11 reads id=5
+
+It goes to the main file and sees `status='shipped'` created by txn 12.
+
+It checks its snapshot: *"Is txn 12 within my snapshot of 10?"* No — 12 > 10. Too new. Invisible.
+
+It follows the pointer to the undo log and finds `status='pending'` created by txn 10.
+
+It checks: *"Is txn 10 within my snapshot of 10?"* Yes — 10 ≤ 10. Visible. ✅
+
+**Transaction 11 reads `status='pending'`** — the world as it was when it started.
+
+### Step 4: Transaction 15 (a future reader) reads id=5
+
+It started after txn 12 committed, so its snapshot is 12 or higher.
+
+It goes to the main file and sees `status='shipped'` created by txn 12.
+
+It checks: *"Is txn 12 within my snapshot?"* Yes. ✅
+
+**Transaction 15 reads `status='shipped'`** — directly from the main file. No undo log needed.
 
 
 
+## What if a Reader and Writer Hit the Same Row at the Same Time?
+
+This is where MVCC really shines. The writer does not wait for the reader, and the reader does not wait for the writer.
+
+The writer always follows this order:
+1. Save old row to undo log **first**
+2. Update main file **second**
+
+So at any given moment, either:
+- The main file still has the old row → reader reads it directly ✅
+- The main file has the new row, undo log has the old row → reader follows the pointer ✅
+
+There is no in-between state where the reader sees garbage. The old version is always accessible — either in the main file or in the undo log.
+
+Think of it like this: imagine you are reading a document and someone wants to edit it. Instead of grabbing the paper from your hands, they first make a photocopy and file it away, then edit the original. At no point are you holding a half-edited document.
+
+
+
+## What About True Simultaneous Access (Same Millisecond)?
+
+At the exact hardware level, two processes cannot read and write the same memory or disk location simultaneously. InnoDB handles this with a **latch** — an extremely brief, low-level mechanism held for just microseconds while a page is being physically read or written.
+
+This is different from a lock:
+
+| | Latch | Lock |
+|---|---|---|
+| Duration | Microseconds | Milliseconds to seconds |
+| Purpose | Physical page access | Protecting a row during a transaction |
+| Eliminated by MVCC? | No — unavoidable physics | Yes |
+
+Think of it like a revolving door. Two people cannot pass through at the exact same instant — one goes first, the other waits half a second. Nobody considers that "blocking" in any meaningful sense.
+
+So MVCC eliminates **meaningful waiting** (row-level locks). The microsecond latch is just physics — it exists at the OS/hardware level regardless of what the database does.
+
+
+
+## The Only Case Where Real Waiting Happens
+
+**Writer vs Writer.** If two transactions want to update the same row simultaneously, one must wait for the other to commit or rollback. You cannot have two conflicting new versions of the same row created at once.
+
+```
+Reader  +  Reader  →  no waiting
+Reader  +  Writer  →  no waiting  (MVCC handles it)
+Writer  +  Writer  →  one waits  (lock required)
+```
+
+
+
+## Cleanup — The Undo Log Doesn't Grow Forever
+
+Old versions in the undo log are kept as long as any active transaction might need them. Once no running transaction has a snapshot old enough to need a version, InnoDB purges it from the undo log automatically in the background.
+
+This is simpler than Postgres's approach — in Postgres, dead row versions accumulate inside the heap file itself and require a separate VACUUM process to clean up. InnoDB keeps the main file clean by design, at the cost of maintaining the undo log separately.
+
+
+
+## Summary
+
+- MVCC keeps multiple versions of a row so readers and writers don't block each other
+- InnoDB stores the **latest version** in the main file and **old versions** in the undo log, linked by pointers
+- Every transaction gets a **snapshot** — a cutoff number — and only sees row versions created at or before that point
+- Readers walk back through the undo log version chain until they find a version that fits their snapshot
+- The only real blocking is **writer vs writer**, and a microsecond-level **latch** for physical page access
+
+<img width="1472" height="440" alt="image" src="https://github.com/user-attachments/assets/d03f1e92-ce5d-4626-98d7-86f803622b0f" />
 
