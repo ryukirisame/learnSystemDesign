@@ -153,13 +153,13 @@ Low selectivity   (close to 0)  →  index may be ignored or even harmful
 
 ## Why do we not create index on every column?
 1. Every write becomes more expensive
-  - Every time we insert a row or update a row or delete a row, the database has to update every index on that table - apart from clustered index/heap data.
-  - Every index update may split nodes or merge nodes. So more number of disk block reads and writes.
-  - So eventually, the more indexes we have, the slower our writes becomes.
+    - Every time we insert a row or update a row or delete a row, the database has to update every index on that table - apart from clustered index/heap data.
+    - Every index update may split nodes or merge nodes. So more number of disk block reads and writes.
+    - So eventually, the more indexes we have, the slower our writes becomes.
 2. Indexes take up disk space
-  - Every index is a separate B+ tree stored on disk.
+    - Every index is a separate B+ tree stored on disk.
 3. Low selectivity indexes are useless anyway
-  - If a column selectivity is low - like gender, is_active, status - there will be lots of double lookups to the clustered index/primary index. Furthermore, the query planner may choose to ignore indexes and perform sequential scan instead if selectivity is very low.
+    - If a column selectivity is low - like gender, is_active, status - there will be lots of double lookups to the clustered index/primary index. Furthermore, the query planner may choose to ignore indexes and perform sequential scan instead if selectivity is very low.
 
 ### When should we index a column
 - if the column is queried frequently
