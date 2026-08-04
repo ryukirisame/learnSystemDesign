@@ -25,6 +25,8 @@
 - Usually, we go with auto-incremented primary key. 1,2,3,4,... so on. If we decide to use BST to store this, we might end up with right skewed BST. Which will basically turn into a linked list.
 - B-tree is self-balancing. Balance is made via splitting a node and push the median upwards. It builds the tree bottom-to-up. Every leaf node is at the same level. 
 
+---
+
 ## How different queries map to the tree
 ### Point Lookups (`WHERE id = 105`)
 - Easy. Just go through the tree and find the key.
@@ -53,6 +55,8 @@ SELECT * FROM users WHERE name LIKE 'Jo%';
   - The database stops when it hits a key that no longer starts with `Jo`.
 - Prefix scans definitely have an advantage of the index. But middle and suffix scans doesn't have that. They can't use the B+ tree index. 
 
+---
+
 ## Why do databases prefer B+ trees instead of classic B-trees?
 - In classic B-trees, every node - both internal and leaf - can store actual data. So, if we are doing point lookup, we find the key in an internal node, get the data and we are done.
 - In B+ tree, internal nodes only store keys. They are used for navigation purpose only. All actual data lives in the leaf nodes. The leaf nodes are also linked together as a linked list.
@@ -67,6 +71,8 @@ SELECT * FROM users WHERE name LIKE 'Jo%';
 #### 3. Better cache and disk efficiency
 - Since internal nodes of B+ trees are light, we can easily fit the internal nodes in memory as cache. They also work as index. So, it will be blazing fast to query the index.
 - In classic B trees, internal nodes also contain data. So, it would be difficult to cache them in memory. 
+
+---
 
 ## What happens when we have a secondary index and there are multiple records that matches a key
 
@@ -143,3 +149,25 @@ High selectivity  (close to 1)  →  index is very useful
 Low selectivity   (close to 0)  →  index may be ignored or even harmful
 ```
 
+---
+
+## Why do we not create index on every column?
+1. Every write becomes more expensive
+  - Every time we insert a row or update a row or delete a row, the database has to update every index on that table - apart from clustered index/heap data.
+  - Every index update may split nodes or merge nodes. So more number of disk block reads and writes.
+  - So eventually, the more indexes we have, the slower our writes becomes.
+2. Indexes take up disk space
+  - Every index is a separate B+ tree stored on disk.
+3. Low selectivity indexes are useless anyway
+  - If a column selectivity is low - like gender, is_active, status - there will be lots of double lookups to the clustered index/primary index. Furthermore, the query planner may choose to ignore indexes and perform sequential scan instead if selectivity is very low.
+
+### When should we index a column
+- if the column is queried frequently
+- if the column is highly selective
+- if the table is read-heavy
+
+```
+Frequently queried + high selectivity + read-heavy table  →  index it
+Rarely queried     + low selectivity  + write-heavy table →  don't index it
+```
+  
