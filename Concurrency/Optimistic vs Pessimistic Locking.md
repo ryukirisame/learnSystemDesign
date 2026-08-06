@@ -55,4 +55,191 @@ try {
 }
 ```
 
+# Pessimistic Locking
+- This type of locking assumes that conflicts are likely to happen. A transaction explicitly acquires a lock on a row before performing any operation. All other transactions that try to lock the same row must wait until the lock is released (on commit or rollback).
+- The lock is managed by database itself.
+- A transaction explicitly acquires a lock on a row. All other transactions that tries to lock the row will have to wait for the current acquiring transaction to release the lock.
+
+## Two types of locks
+### Exclusive Locks(X)
+- Only one transaction can hold lock on a row. Even a reader who tries to lock will not get the lock if row is already locked. Plain readers who don't try to lock the row can get through, they are fine because databases has to support MVCC.
+
+  
+<img width="900"  alt="image" src="https://github.com/user-attachments/assets/146ad445-6afc-401f-8f25-48bccac58740" />
+
+## Code Examples
+- We use the `SELECT ... FOR UPDATE` to acquire a lock.
+```sql
+BEGIN;
+
+-- Acquires an exclusive row lock immediately
+SELECT * FROM accounts
+WHERE id = 42
+FOR UPDATE;           -- other transactions block here
+
+-- Now safely read-modify-write with no race condition
+UPDATE accounts
+SET balance = balance + 50
+WHERE id = 42;
+
+COMMIT;              -- lock released here
+```
+### `SELECT ... FOR UPDATE` variations
+Different database engines (like MySQL, PostgreSQL, and Oracle) support advanced modifiers to handle what happens if a row is already locked by another transaction.
+- Standard (Blocking): The query waits indefinitely for the concurrent transaction to finish and release the lock.
+  -  ```SELECT * FROM inventory WHERE item_id = 101 FOR UPDATE;```
+- NOWAIT: The query fails immediately with an error if any target row is already locked.
+  - `SELECT * FROM inventory WHERE item_id = 101 FOR UPDATE NOWAIT;`
+- SKIP LOCKED: The query skips any locked rows and only returns available, unlocked rows. This is highly useful for implementing message queues.
+  -  `SELECT * FROM inventory WHERE status = 'pending' FOR UPDATE SKIP LOCKED;`
+
+
+
+
+
+
+# Pessimistic Locking
+
+Assumes conflicts are likely. A transaction explicitly acquires a lock on a row before performing any operation. All other transactions that try to lock the same row must wait until the lock is released (on commit or rollback). The lock is managed by the database itself.
+
+## Two types of locks
+
+### 1. Exclusive Lock (X-lock)
+Acquired via: `SELECT ... FOR UPDATE` (explicitly acquires X), `UPDATE`, `DELETE`, `INSERT`
+
+- Only one transaction can hold X at a time.
+- Blocks all other transactions trying to acquire any lock on the row. (both `FOR SHARE` and `FOR UPDATE` requests will wait).
+- Plain `SELECT` (no locking clause) is NOT blocked — it reads a consistent snapshot via MVCC without acquiring a lock.
+- Use when: you intend to write to the row.
+
+### 2. Shared Lock (S)
+Acquired via: `SELECT ... FOR SHARE`
+
+- Multiple transactions can hold S locks on the same row simultaneously.
+- If a transaction tries to acquire an X lock on a row which already has a shared lock, the transaction will have to wait until all shared locks are released.
+- Does NOT block other FOR SHARE readers. Meaning, other transactions trying to acquire a shared lock on the same row can proceed.
+- Plain `SELECT` (no locking clause) is also NOT blocked — MVCC again.
+- Use when: you need to read a row and pin it(freeze it temporarily) so nobody can modify it. Even the same transaction cannot modify.
+- The main idea is to block writers. Any write operation (UPDATE, DELETE, or INSERT affecting the row) implicitly requires an X-lock. Because an X-lock cannot co-exist with an S-lock, any transaction attempting a write will have to wait until all existing shared locks on that row are released.
+
+⚠️ Lock upgrade deadlock: if two transactions both hold S locks and both try to upgrade to X, they deadlock — each waits for the other to release its S lock. Fix: if you know you'll write, use FOR UPDATE from the start, never FOR SHARE → upgrade.
+
+## Compatibility
+<img width="730" height="170" alt="image" src="https://github.com/user-attachments/assets/6c562abb-d1f8-434d-925c-5a7b7a8bf846" />
+
+
+## Lock lifetime
+Held for the entire duration of the transaction, not just the statement. Released on COMMIT or ROLLBACK.
+
+---
+
+## When to use which
+
+There are two layers:
+
+### Low level — automatic (atomic operations)
+- `UPDATE`, `DELETE`, and `INSERT` acquire exclusive locks indirectly as part of their execution. You never ask for them — the database just does it to protect the write itself.
+
+- Use when: the entire `read-modify-write` logic fits inside a single SQL statement. No gap, no race condition, no manual locking needed.
+
+```sql
+-- ATOMIC: read and write happen as one unit inside SQL
+-- DB acquires and releases X lock automatically
+UPDATE accounts
+SET balance = balance + 50   -- no gap between read and write
+WHERE id = 42;
+
+DELETE FROM accounts WHERE id = 42;
+
+INSERT INTO accounts (id, balance) VALUES (42, 100);
+```
+
+### High level — explicit (non-atomic operations)
+- `SELECT FOR UPDATE` is a deliberate, application-level tool. Use it when your read-modify-write cycle spans multiple statements with application logic in between. You are telling the database: "I am about to make a decision based on this data — hold it for me until I am done."
+
+- Use when: you need to read first, do something in application code, make a decision, and then write. That gap between read and write is where race conditions live — FOR UPDATE closes it.
+
+```sql
+-- NON-ATOMIC: logic lives in application code
+BEGIN;
+
+SELECT balance FROM accounts    -- read
+WHERE id = 42
+FOR UPDATE;                     -- X lock held across the gap
+
+-- application code runs here:
+-- check if balance > minimum threshold
+-- calculate new balance
+-- apply business rules
+-- make a decision
+
+UPDATE accounts                 -- write (X lock already held, no wait)
+SET balance = 150
+WHERE id = 42;
+
+COMMIT;                         -- X lock released here
+```
+
+### The race condition FOR UPDATE prevents
+
+```sql
+-- WITHOUT SELECT FOR UPDATE (dangerous gap):
+-- Txn A reads balance = 100
+-- Txn B reads balance = 100        ← both read the same stale value
+-- Txn A writes balance = 150
+-- Txn B writes balance = 150       ← overwrites A, 50 is lost
+
+-- WITH SELECT FOR UPDATE (safe):
+-- Txn A: FOR UPDATE → X lock acquired, reads balance = 100
+-- Txn B: FOR UPDATE → blocked, waits
+-- Txn A: writes balance = 150, commits, releases X lock
+-- Txn B: unblocked, reads fresh balance = 150, writes 200 ✓
+```
+
+### The general rule
+
+> If the entire `read-modify-write logic` can be expressed in a single SQL statement, let the database handle locking automatically.
+> If the logic requires reading first, doing something in application code, and then writing — that gap is where race conditions live, and SELECT FOR UPDATE is how you close it.
+
+---
+
+## Code examples
+
+### Exclusive lock — full pattern
+```sql
+BEGIN;
+SELECT * FROM accounts WHERE id = 42 FOR UPDATE;
+-- X lock held — all other lock requests on row 42 block here
+-- application logic runs here safely
+UPDATE accounts SET balance = balance + 50 WHERE id = 42;
+COMMIT; -- X lock released
+```
+
+### Shared lock — pinning a parent row
+```sql
+BEGIN;
+-- Pin the parent row so it cannot be deleted while we insert the child
+SELECT * FROM users WHERE id = 7 FOR SHARE;
+INSERT INTO orders (user_id, amount) VALUES (7, 250);
+COMMIT;
+```
+
+### FOR UPDATE variations
+
+| Modifier    | Behavior                                        | Use case             |
+|-------------|-------------------------------------------------|----------------------|
+| (default)   | Waits indefinitely for the lock                 | Standard writes      |
+| NOWAIT      | Fails immediately with error if row is locked   | Fail-fast scenarios  |
+| SKIP LOCKED | Skips locked rows, returns only available ones  | Job queues, workers  |
+
+```sql
+-- Standard (blocking — waits indefinitely)
+SELECT * FROM inventory WHERE item_id = 101 FOR UPDATE;
+
+-- Fail immediately if locked
+SELECT * FROM inventory WHERE item_id = 101 FOR UPDATE NOWAIT;
+
+-- Skip locked rows (ideal for job queues)
+SELECT * FROM inventory WHERE status = 'pending' FOR UPDATE SKIP LOCKED;
+```
 
