@@ -24,6 +24,7 @@
   
 ## Advantages
 - Distributed safe. Multiple machines can generate unique IDs independently without any coordination and collision.
+- Easy to scale.
 - No ID conflicts on database merges.
 - Client-side generation. We can generate a UUID anywhere. On frontend and backend both. This can be very useful in optimistic UI updates.
 - Not predictable. So no business data leaks.
@@ -37,10 +38,11 @@
 # UUID v7 - Best of both worlds
 - It is time-ordered. The first 48-bits are millisecond timestamp, followed by some random bits.
 - This means, now, UUID is ordered just like auto-increment. Hence, during index inserts, the new row goes to the right-most node, reducing node splits and hence improving write performance. This was one of the main problems with pure random UUID, which is fixed in this version.
+- Since in v7, the ID is time-ordered, so we can sort the IDs and hence we can perform `ORDER BY` operation on ID efficiently, just like auto-increment.
 - Since, we have some randomness, so still not guessable and not predictable and globally unique.
 - For most new systems today, UUID v7 is recommended.
 
-
+# Snowflake IDs
 
 
   
