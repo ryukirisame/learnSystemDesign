@@ -72,7 +72,7 @@ In order to get rid of the issues, we have certain levels of isolation.
 - In this isolation level, a transaction only reads data that was committed before the individual statement began.
 - Implementation:
   - Locking: Before a read statement starts executing, a shared lock is acquired by it and released immediately after the `SELECT` statement finishes (not held till commit of transaction). Exclusive locks are still held by writers and is held till end of transaction.
-  - MVCC: Generates a fresh snapshot of the entire database at the start of every SQL statement. If $T_2$ updates and commits between Query 1 and Query 2 in $T_1$, Query 2 generates a fresh snapshot and sees $T_2$'s commit.
+  - MVCC: Generates a fresh snapshot of the entire database at the start of every SQL statement. Snapshot is discarded once statement finishes. If $T_2$ updates and commits between Query 1 and Query 2 in $T_1$, Query 2 generates a fresh snapshot and sees $T_2$'s commit.
 - This fixes the dirty reads problem.
 - This doesn't fix non-repeatable read problem because of the nature of the non-repeatable read itself. Even if another transaction commits, the reading transaction will get different values for the same query if the update and commit happened between two reads.
 - Taking a fresh snapshot for each statement is the exact reason Phantom Reads happen in `READ COMMITTED`.
@@ -81,11 +81,45 @@ In order to get rid of the issues, we have certain levels of isolation.
 - **Remaining Anomalies**: Non-Repeatable Reads, Lost Updates, Phantom Reads, Write Skew.
 
 ## Repeatable Read
-- This isolation level guarantees that a transaction will see the same data throughout its execution, even if other transactions commit changes to the data.
-- So, if a transaction reads a row once, every subsequent read of that same row within the transaction will return the exact same data, even if concurrent transactions modify and commit changes to it in the meantime.
+- This isolation level guarantees that a transaction will see the same data throughout its execution. 
+- So, if a transaction reads a row once, every subsequent read of that same row within the transaction will return the exact same data.
+- Implementation:
+  - Locking: Shared lock is taken incrementally as each row is read, held until end of transaction. So, we get same data for each row throughout the transaction. Exclusive lock on writes are held till end of transaction to prevent dirty writes as usual. Any concurrent `UPDATE/DELETE` trying to acquire an $X$-lock is blocked. 
+  - MVCC: A snapshot of the entire database is taken at the beginning of the transaction and this snapshot is used throughout the transaction. Please note: only committed version of each rows are part of this snapshot, uncommitted versions not allowed.
 - This prevents dirty reads because the transaction only sees committed values, and eliminates non-repeatable reads because it guarantees the entire transaction sees the same thing throughout.
 - This level also eliminates lost updates.
-- However, phantom reads are still possible.
+  - Locking: $T_1$ and $T_2$ both hold $S$-locks. When either attempts to upgrade to an $X$-lock to perform the write, a deadlock is triggered and the engine terminates one transaction. 
+  - MVCC: When a transaction wants to update a row, it will first check if that row's committed version is the same as the transactions snapshot version or not. If someone else committed a change to that exact row in the meantime, that means the current transaction might overwrite data committed by that other transaction - leading to lost update problem. So, MVCC aborts the current transaction.
+  ```
+  Time   Transaction A (Snapshot @ T1)              Transaction B (Snapshot @ T1)
+  ────────────────────────────────────────────────────────────────────────────────────────────
+  T1     BEGIN TRANSACTION ISOLATION                BEGIN TRANSACTION ISOLATION 
+         LEVEL REPEATABLE READ;                     LEVEL REPEATABLE READ;
+  
+  T2     SELECT balance FROM accounts               SELECT balance FROM accounts 
+         WHERE id = 1;                              WHERE id = 1;
+         (Reads 100)                                (Reads 100)
+  
+  T3     UPDATE accounts SET balance = 150 
+         WHERE id = 1;
+         (Acquires X-Lock on row 1)
+  
+  T4                                                UPDATE accounts SET balance = 120 
+                                                    WHERE id = 1;
+                                                    [BLOCKED - Waiting for Txn A's lock]
+  
+  T5     COMMIT; 
+         (Txn A's 150 committed successfully)
+  
+  T6                                                [Txn B Unblocks & Evaluates Row State]
+                                                    ERROR: could not serialize access 
+                                                    due to concurrent update
+                                                    (Txn B is ABORTED by Postgres!)
+  ```
+  Here, transaction B at T6 checks whether row id = 1 was modified by some other transaction after its snapshot and aborts.
+  
+- The standard says phantom reads **can** exist in repeatable reads because it considered lock based implementation. But when MVCC came, because of its snapshot nature, each transaction sees only those rows that were part of the snapshot. Any rows that were inserted/delete later by some other transaction are not part of the snapshot. So, MVCC ends up naturally over-delivering and eliminates phantom reads at repeatable read isolation level only.
+- Remaining Issues: Write Skew
 
 |Time|Transaction 1 (Generate Report)     |Transaction 2 (Price Update)                      |READ COMMITTED        |REPEATABLE READ       |
 |----|------------------------------------|--------------------------------------------------|----------------------|----------------------|
