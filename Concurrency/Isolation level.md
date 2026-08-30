@@ -69,10 +69,16 @@ In order to get rid of the issues, we have certain levels of isolation.
   - MVCC: MVCC doesn't even implement this level. Reads simply use latest data regardless of commit status (Postgres treats this as Read Committed).  
 
 ## Read Committed
-- This isolation level allows only committed changes to be read by a transaction.
+- In this isolation level, a transaction only reads data that was committed before the individual statement began.
+- Implementation:
+  - Locking: Before a read statement starts executing, a shared lock is acquired by it and released immediately after the `SELECT` statement finishes (not held till commit of transaction). Exclusive locks are still held by writers and is held till end of transaction.
+  - MVCC: Generates a fresh snapshot of the entire database at the start of every SQL statement. If $T_2$ updates and commits between Query 1 and Query 2 in $T_1$, Query 2 generates a fresh snapshot and sees $T_2$'s commit.
 - This fixes the dirty reads problem.
 - This doesn't fix non-repeatable read problem because of the nature of the non-repeatable read itself. Even if another transaction commits, the reading transaction will get different values for the same query if the update and commit happened between two reads.
-- This level also allows phantom reads and lost update problems.
+- Taking a fresh snapshot for each statement is the exact reason Phantom Reads happen in `READ COMMITTED`.
+- This level also allows lost update problem.
+- **Anomalies Solved**: Eliminates Dirty Reads
+- **Remaining Anomalies**: Non-Repeatable Reads, Lost Updates, Phantom Reads, Write Skew.
 
 ## Repeatable Read
 - This isolation level guarantees that a transaction will see the same data throughout its execution, even if other transactions commit changes to the data.
