@@ -1,22 +1,148 @@
 
-# Isolation
+# Transactions
+Imagine you're transferring ₹1,000 from Alice to Bob.
+
+You need to do two things:
+
+1. Subtract ₹1,000 from Alice.
+2. Add ₹1,000 to Bob.
+
+Without a transaction, this could happen:
+```
+Alice: ₹5,000
+Bob:   ₹2,000
+
+Subtract ₹1,000 from Alice
+→ Alice: ₹4,000
+
+💥 Server crashes
+
+Add ₹1,000 to Bob never happens
+→ Bob: ₹2,000
+
+```
+- Now ₹1,000 has disappeared. That's obviously bad.
+- This is where transactions come into the picture.
+- The database guarantees that the changes are done together and never a half-finished transfer.
+
+## What is a database transaction?
+A transaction is a collection of one or more SQL queries treated as a single, indivisible unit of work.
+
+```sql
+BEGIN;
+  -- Step 1: Check balance
+  SELECT balance FROM accounts WHERE account_id = 1;
+
+  -- Step 2: Debit sender
+  UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
+
+  -- Step 3: Credit receiver
+  UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
+COMMIT;
+```
+
+### Transaction Lifecycle
+Normally
+```
+BEGIN
+  ↓
+READ / WRITE
+  ↓
+READ / WRITE
+  ↓
+COMMIT
+
+```
+If something goes wrong:
+```
+BEGIN
+  ↓
+READ / WRITE
+  ↓
+ERROR
+  ↓
+ROLLBACK
+```
+
+
+### Core Transaction Control Commands:
+- `BEGIN / START TRANSACTION`: Explicitly defines the start of a transaction block.
+- `COMMIT`: Tells the database engine to permanently apply and persist all changes made during the transaction.
+- `ROLLBACK / ABORT`: Cancels the entire transaction, discarding all uncommitted in-memory or dirty changes and returning data to its initial state.
+
+
+## ACID properties
+In order to ensure transactions are reliable and predictable and execute correctly, databases provide ACID properties:
+1. Atomicity
+2. Consistency
+3. Isolation
+4. Durability
+
+
+# 1. Atomicity
+Atomicity ensures that all queries within a transaction either completely succeed or completely fail.
+
+```
+Normal Flow:
+[Debit Account 1] ──► [Credit Account 2] ──► [COMMIT] (Success)
+
+Failure Scenario (Without Atomicity):
+[Debit Account 1] ──► [System Crash / DB Error] ──► $100 Vanishes Into Thin Air!
+
+Failure Scenario (With Atomicity):
+[Debit Account 1] ──► [System Crash / DB Error] ──► [Automatic ROLLBACK] (Balance Restored)
+```
+
+- The Problem It Solves: If a database crashes midway through transferring money between accounts, a partial update would debit Account 1 without crediting Account 2.
+- The Guarantee: If any query fails or a crash occurs before COMMIT, the database engine traverses its undo mechanism to revert all partial modifications made by that transaction.
+
+
+# 2. Isolation
+- Two transactions can run concurrently. Concurrency is desirable as it increases the throughput of the system. There is no compromise on this one. 
+- Since two transactions are running concurrently and can work on the same data, they may run into race conditions, leading to interfering with each others work and producing wrong results.
+- So, in order to ensure they do not interfere with each other, we need to have some isolation between the two transactions, so that they execute correctly.
 - Isolation in ACID means that two concurrent transactions should not interfere with each others operations, ensuring no race conditions.
 - Without isolation, we end up with certain issues because of concurrent execution of transactions.
 
 ## Issues with concurrency of transactions
+
 1. Dirty Reads - T1 reads a value written by T2, before T2 commits.
 2. Lost update problem (write-write problem) - T1 and T2 both read the same value, both compute a new value based on it, and one write overwrites the other without either seeing the other's change. A lost update happens during an application-level `read-modify-write` cycle when two transactions read the same data at the same time and both try to update it based on what they saw.
 3. Non-repeatable read problem - T1 reads a row twice, gets different values, because T2 committed a change to that row in between 
 4. Phantom read problem - T1 runs the same range query twice, gets a different set of rows, because T2 inserted/deleted rows matching the predicate.
+5. Write Skew
+6. Dirty Writes
 
-Before we learn about how to eliminate these issues, lets first understand dirty writes.
+### 5. Write Skew
+- Write skew occurs when two concurrent transactions read the same data, check a business rule, and then update different rows. Because they modify separate records, both transactions commit without a write conflict—but their combined changes violate the business rule.
+
+#### Example: Doctors on call
+- Business requirement: At least one doctor must always be on call.
+- Initial state: Both Alice and Bob are on call. Both of them want to check if another one is on-call, so that he/she can go off-call.
+
+|Time|Transaction 1 (Alice leaves)                            |Transaction 2 (Bob leaves)                            |What Happens                                |
+|----|--------------------------------------------------------|------------------------------------------------------|--------------------------------------------|
+|t1​ |SELECT count(*) WHERE on_call = true;                   |—                                                     |Alice sees 2 doctors on call. Safe to leave.|
+|t2​ |—                                                       |SELECT count(*) WHERE on_call = true;                 |Bob sees 2 doctors on call. Safe to leave.  |
+|t3​ |UPDATE doctors SET on_call = false WHERE name = 'Alice';|—                                                     |Alice modifies Row A.                       |
+|t4​ |—                                                       |UPDATE doctors SET on_call = false WHERE name = 'Bob';|Bob modifies Row B.                         |
+|t5​ |COMMIT;                                                 |COMMIT;                                               |Both succeed.                               |
+
+- Result: 0 doctors are on call. The business rule is broken.
+- The fundamental difference between lost update problem and write skew is that, in lost update, two transactions end up overwriting the same row data, while in write skew, two transactions update different rows in the end.
+- How to prevent write skew:
+  - Alice must lock all the rows involved first before she makes any change. So that bob cannot read-modify-write at the same time. She must acquire exclusive lock for that.
+     - `SELECT * FROM doctors WHERE on_call = true FOR UPDATE;`
+  - Use serializable isolation level.  
+
+
 ## Dirty Writes vs Lost Updates
-### Dirty Writes (Overwriting Uncommitted Data)
+### 6. Dirty Writes (Overwriting Uncommitted Data)
 - Let's consider two transactions T1 and T2.
 - Theres a value X = 100.
 - T1 wants to update it to 110 and T2 want to update it to 120.
 - T1 updates x to 110. Not committed yet.
-- T2 runs and updates X to 120 and committs.
+- T2 runs and updates X to 120 and commits.
 - T1 resumes. It can either commit or fail and rollback.
   - If it commits: T1 will commit thinking that it wrote the value 110. This leads to consistency & durability violation because T1 was the last transaction to commit, yet its value was not persisted.
   - If it rollbacks, the value of X would be 100, as that was the value of X when the T1 started. So x = 100, completely erases T2's work, again violating durability even after T2 committed. 
@@ -48,7 +174,8 @@ T7                                             COMMIT;
   - Atomic SQL updates: `UPDATE accounts SET balance = balance + 50 WHERE id = 1;`
   - Optimistic and Pessimistic locking.
 
-In order to get rid of the issues, we have certain levels of isolation.
+In order to get rid of the issues due to concurrency, we have levels of isolation for transactions.
+
 ## Isolation levels
 1. Read Uncommitted
 2. Read Committed
