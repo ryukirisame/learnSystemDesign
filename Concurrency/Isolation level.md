@@ -136,7 +136,7 @@ Failure Scenario (With Atomicity):
   - Use serializable isolation level.  
 
 
-## Dirty Writes vs Lost Updates
+### Dirty Writes vs Lost Updates
 ### 6. Dirty Writes (Overwriting Uncommitted Data)
 - Let's consider two transactions T1 and T2.
 - Theres a value X = 100.
