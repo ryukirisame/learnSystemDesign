@@ -300,13 +300,13 @@ COMMIT;
 |t3​ |SELECT price FROM items WHERE id = 1|—                                                 |Sees $150 (Fuzzy Read)|Sees $100 (Consistent)|
 |t4​ |COMMIT;                             |—                                                 |—                     |—                     |
 
-# 4. Serializable
+## 4. Serializable
 - This is the highest isolation level.
 - It guarantees that the outcome of executing concurrent transactions is equivalent to executing them one at a time - sequentially/serially.
 - It eliminates all the concurrency issues. While REPEATABLE READ prevents dirty reads, lost updates, and non-repeatable reads, it fails to prevent Write Skew.
 - All the anomalies are solved at this level, at the cost of some concurrency.
 
-## Serial vs Serializable
+### Serial vs Serializable
 Serial
 ```
 T1 completely finishes
@@ -330,26 +330,26 @@ T2 → T1
 ```
 
 
-# Concurrency Control Techniques
+## Concurrency Control Techniques
 Both of these guarantee that concurrent transactions are serializable.
 - Strict 2PL (Pessimistic Approach) 
 - Serializable Snapshot Isolation (SSI) (Optimistic Approach)
 
 
-# Application-Level Patterns to Avoid Serialization Overhead
+## Application-Level Patterns to Avoid Serialization Overhead
 Since serializability is costly, here are some application level stuff that we can do instead of serializability at engine level.
-## Atomic SQL Updates
+### Atomic SQL Updates
 ```sql
 UPDATE accounts SET balance = balance - 50 WHERE id = 1 AND balance >= 50;
 ```
 Then check number of rows affected. If it's 0, that means operation failed, otherwise succeeded.
 
-## Optimistic Locking
+### Optimistic Locking
 ```sql
 UPDATE items SET stock = stock - 1, version = version + 1 WHERE id = 10 AND version = 2;
 ```
 
-## Explicit Pessimistic Locking
+### Explicit Pessimistic Locking
 ```sql
 SELECT inventory FROM products WHERE id = 10 FOR UPDATE;
 ```
