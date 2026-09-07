@@ -355,3 +355,26 @@ SELECT inventory FROM products WHERE id = 10 FOR UPDATE;
 ```
 - Then, Checking Inventory -> Decrement Inventory -> Commit.
 - Another transaction trying to lock the same row must wait.
+
+
+# 3. Consistency
+- The database must be in consistent state before and after the transaction.
+- Consistency guarantees that a transaction takes the database from one valid state to another valid state.
+- Consistency is the actual end goal. Atomicity, Isolation and Durability are the way through which we achieve that goal.
+- Consistency is not just enforced by the database engine alone, application layer must also help with correct business logic implementation.
+  
+- The database engine provides constraints like foreign key, primary key, unique, `not null`, `check` constraints etc.
+```sql
+CREATE TABLE accounts (
+    id TEXT PRIMARY KEY,
+    balance_cents BIGINT NOT NULL CHECK (balance_cents >= 0)
+);
+```
+- This CHECK constraint prevents the database from storing a negative balance.
+- Application layer must handle business rules correctly.
+- Please note, C in ACID is different from C in CAP theorem.
+
+
+
+
+
