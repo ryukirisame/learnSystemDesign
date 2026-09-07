@@ -1,4 +1,7 @@
 
+
+
+
 # Transactions
 Imagine you're transferring ₹1,000 from Alice to Bob.
 
@@ -182,6 +185,10 @@ In order to get rid of the issues due to concurrency, we have levels of isolatio
 3. Repeatable Read
 4. Serializable
 
+<img width="1062" height="283" alt="Screenshot 2026-09-05 at 9 11 40 PM" src="https://github.com/user-attachments/assets/dbb76159-a508-4ae7-bfbb-31601810d06f" />
+
+
+
 ### Implementation Paradigms
 - Databases implement/enforce the above isolation levels in two different ways:
   - Pessimistic Locking(2PL)
@@ -195,7 +202,7 @@ In order to get rid of the issues due to concurrency, we have levels of isolatio
   - Locking: Read queries do not acquire any lock. Only writers acquire exclusive locks till the end of transaction to prevent dirty writes. Exclusive locks for writes are a given thing. No matter which isolation level. The database must not allow two writers to write on the same row concurrently to prevent data corruption.
   - MVCC: MVCC doesn't even implement this level. Reads simply use latest data regardless of commit status (Postgres treats this as Read Committed).  
 
-## Read Committed
+## 2. Read Committed
 - In this isolation level, a transaction only reads data that was committed before the individual statement began.
 - Implementation:
   - Locking: Before a read statement starts executing, a shared lock is acquired by it and released immediately (query-level lock, not transaction level) after the `SELECT` statement finishes (not held till commit of transaction). Exclusive locks are still held by writers and is held till end of transaction. 
@@ -241,7 +248,7 @@ COMMIT;
 
 
 
-## Repeatable Read
+## 3. Repeatable Read
 - This isolation level guarantees that a transaction will see the same data throughout its execution. 
 - So, if a transaction reads a row once, every subsequent read of that same row within the transaction will return the exact same data.
 - Implementation:
@@ -254,11 +261,11 @@ COMMIT;
   ```
     How MVCC Prevents Lost Updates (Repeatable Read)
 
-    1. Write-First Protection (Row Locks):
+    CASE 1. Write-First Protection (Row Locks):
        - Even in MVCC, write statements (`UPDATE`, `DELETE`) immediately acquire row-level Exclusive (X) locks held until transaction termination (`COMMIT`/`ROLLBACK`).
        - If T1 writes first, any concurrent write by T2 on that row is blocked, ensuring T1's in-flight work cannot be overwritten.
     
-    2. Read-First Protection (First-Committer-Wins):
+    CASE 2. Read-First Protection (First-Committer-Wins):
        - If T1 only reads a row (holding no locks) and T2 commits an update to that row in the meantime, T1's snapshot view becomes stale.
        - When T1 eventually issues its `UPDATE`, the engine inspects the row's commit metadata against T1's snapshot.
        - Detecting that the row was modified after the snapshot began, the engine aborts T1 immediately with a serialization error instead of overwriting T2's committed data.
@@ -293,7 +300,58 @@ COMMIT;
 |t3​ |SELECT price FROM items WHERE id = 1|—                                                 |Sees $150 (Fuzzy Read)|Sees $100 (Consistent)|
 |t4​ |COMMIT;                             |—                                                 |—                     |—                     |
 
-## Serializable
+# 4. Serializable
 - This is the highest isolation level.
-- It guarantees that the outcome of executing concurrent transactions is mathematically equivalent to executing them one at a time - sequentially/serially.
-- It eliminates all the concurrency issues.
+- It guarantees that the outcome of executing concurrent transactions is equivalent to executing them one at a time - sequentially/serially.
+- It eliminates all the concurrency issues. While REPEATABLE READ prevents dirty reads, lost updates, and non-repeatable reads, it fails to prevent Write Skew.
+- All the anomalies are solved at this level, at the cost of some concurrency.
+
+## Serial vs Serializable
+Serial
+```
+T1 completely finishes
+        ↓
+T2 starts
+```
+- Consistency is maintained
+
+Serializable
+```
+
+T1 ──┐
+     ├── operations may interleave
+T2 ──┘
+
+but the result is equivalent to:
+T1 → T2
+or
+T2 → T1
+
+```
+
+
+# Concurrency Control Techniques
+Both of these guarantee that concurrent transactions are serializable.
+- Strict 2PL (Pessimistic Approach) 
+- Serializable Snapshot Isolation (SSI) (Optimistic Approach)
+
+
+# Application-Level Patterns to Avoid Serialization Overhead
+Since serializability is costly, here are some application level stuff that we can do instead of serializability at engine level.
+## Atomic SQL Updates
+```sql
+UPDATE accounts SET balance = balance - 50 WHERE id = 1 AND balance >= 50;
+```
+Then check number of rows affected. If it's 0, that means operation failed, otherwise succeeded.
+
+## Optimistic Locking
+```sql
+UPDATE items SET stock = stock - 1, version = version + 1 WHERE id = 10 AND version = 2;
+```
+
+## Explicit Pessimistic Locking
+```sql
+SELECT inventory FROM products WHERE id = 10 FOR UPDATE;
+```
+- Then, Checking Inventory -> Decrement Inventory -> Commit.
+- Another transaction trying to lock the same row must wait.
