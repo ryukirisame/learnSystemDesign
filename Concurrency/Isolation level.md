@@ -374,7 +374,47 @@ CREATE TABLE accounts (
 - Application layer must handle business rules correctly.
 - Please note, C in ACID is different from C in CAP theorem.
 
+# Durability
+- After a transaction commits, the changes done by the transaction must persist.
+- If the system restarts, the data should be there.
+- It's implemented through Write-Ahead Logging (WAL)
 
+## WAL (Write-Ahead Log)
 
+- The Problem: On `COMMIT`, if we write every modified table page to disk directly, it may lead to random disk I/O operation as the two page blocks might be scattered at different places on the disk. This is slow. Furthermore, if the system restarts or crashes while the pages are being written to disk, there is no way to recover them as the pages existed on RAM only.
 
+### Scenario
+- Let's suppose we start a transaction and perform our first update operation.
+
+```sql
+BEGIN;
+
+UPDATE Students
+SET Age = 25
+WHERE ID = 2;
+```
+- We want to update the age of Bob.
+- Now, the database doesn't perform the update operation directly onto the disk. It first goes to the block on the disk where Bob's data is stored and loads that entire block in the RAM.
+- When we have read the block onto the RAM, we call it a page. For study purpose, lets suppose `page size = block size`.
+- Now that we have the page, it performs offset and reaches Bob's row and updates the age column to 25. Since we modified this page, this page now marked as "dirty" by the OS. Dirty means that the copy of the page in memory and the disk are different.
+
+- Now let's suppose that further down in the transaction we want to update Alice's age.
+- Again, the database will bring the corresponding page from the disk to the RAM. This page might be completely different than Bob's.
+- The database will do the same for Alice, it will modify her age and the page will be marked as dirty.
+- Now we have two different dirty pages which belongs to different blocks on the disk.
+- When we perform `COMMIT`, then it's time to write these dirty pages to the disk. Now since they belong to different blocks, and can even be from different sectors, that means the hard disk's head will have to move back and forth a lot. This movement makes the write operation slow. This is called random disk access, which is slow and hard disk's were not meant for random access, rather they were meant for sequential access.
+- This is the reason, why databases use a write-ahead log.
+- So, instead of immediately write all the dirty pages to the disk, we record the write operation change on the log. This is an append-only log file, so writing to it is cheap. We just need to grab the last page of the file and write the log record to it. 
+- As the name suggests, we log the record before performing the actual write operation.
+- Once we are sure that we have recorded the log in the WAL file, **then only** we proceed with writing the actual dirty pages back to the disk. This is important, because now if the system crashes or restarts, we can read the log, replay it and recover the data. If the system crashes before logging, then the data is not recoverable.
+- To further optimize that, what we do is batch these dirty pages disk writes. So, once in a while on an interval we could perform batch writes to the disk instead of on every `COMMIT`.. 
+
+### What do we store in the WAL
+- We store enough information to recover the data back in case something goes wrong.
+- What exactly and how exactly, that depends on the database implementation, but here are some common things we should record:
+  - The transaction that modified the page
+  - Page number
+  - Row number of the table
+  - Old value
+  - New value 
 
