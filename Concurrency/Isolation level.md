@@ -374,7 +374,7 @@ CREATE TABLE accounts (
 - Application layer must handle business rules correctly.
 - Please note, C in ACID is different from C in CAP theorem.
 
-# Durability
+# 4. Durability
 - After a transaction commits, the changes done by the transaction must persist.
 - If the system restarts, the data should be there.
 - It's implemented through Write-Ahead Logging (WAL).
@@ -396,7 +396,7 @@ WHERE ID = 2;
 - We want to update the age of Bob.
 - Now, the database doesn't perform the update operation directly onto the disk. It first goes to the block on the disk where Bob's data is stored and loads that entire block in the RAM.
 - When we have read the block onto the RAM, we call it a page. For study purpose, lets suppose `page size = block size`.
-- Now that we have the page, DB applies the offset and reaches Bob's row and updates the age to 25. Since we modified this page, this page now marked as "dirty" by the OS. Dirty means that the copy of the page in memory and the disk are different.
+- Now that we have the page, DB applies the offset and reaches Bob's row and updates the age to 25. Since we modified this page, this page is now marked as "dirty". Dirty means that the copy of the page in memory and the disk are different.
 
 - Now let's suppose that further down in the transaction we want to update Alice's age.
 - Again, the database will bring the corresponding page from the disk to the RAM. This page might be completely different than Bob's.
